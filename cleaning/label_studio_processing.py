@@ -27,6 +27,8 @@ FILES = DATA_DIR.glob('*.json')
 
 OUTPUT_FILE = INTERIM_DIR / 'ls-annotations.csv'
 
+LIMIT_RESULT_STRING_LENGTH = 2000   # skip results with long annotation strings
+
 
 # For debugging, if necessary
 def pretty_json(data):
@@ -43,7 +45,7 @@ def has_only_one_item_per_row(series):
     return (series.apply(len) == 1).all()
 
 
-def process_ls_files(files):
+def process_files(files):
     df = pd.DataFrame()
 
     for file_path in files:
@@ -68,19 +70,28 @@ def process_ls_files(files):
                         result_string = result['value']['text']
                         result_labels = result['value']['labels']
 
-                        df = df.append({"LS_NOTE_TEXT": ls_text,
-                                        "LS_FIRST_INDEX": result_index_start,
-                                        "LS_LAST_INDEX": result_index_end,
-                                        "LS_TEXT_STRING": result_string,
-                                        "LS_LABEL": result_labels},
-                                       ignore_index=True)
+                        # Check for overly long "annotations"
+                        if len(result_string) >= LIMIT_RESULT_STRING_LENGTH:
+                            logging.warning('Very long annotation string '
+                                            'encountered, skipping...')
+                            continue
+
+                        else:
+                            df = df.append({"LS_NOTE_TEXT": ls_text,
+                                            "LS_FIRST_INDEX": result_index_start,
+                                            "LS_LAST_INDEX": result_index_end,
+                                            "LS_TEXT_STRING": result_string,
+                                            "LS_LABEL": result_labels},
+                                           ignore_index=True)
 
                     except KeyError as error:
                         logging.warning('Reading file: {}\n'
-                                        'No annotation info in this '
-                                        'completion (id = {:>8}). Skipping.\n'
+                                        'No annotation info in this completion'
+                                        ' (id = {:>8}). Skipping...\n'
                                         '\tKeyError: Key {} not found.'
-                                        .format(file_path, completion_id, error))
+                                        .format(file_path,
+                                                completion_id,
+                                                error))
                         continue
 
     if has_only_one_item_per_row(df['LS_LABEL']):
@@ -93,7 +104,7 @@ def process_ls_files(files):
 
 
 if __name__ == '__main__':
-    processed_df = process_ls_files(FILES)
+    processed_df = process_files(FILES)
 
     print('Writing to {}...'.format(OUTPUT_FILE))
 

@@ -3,5 +3,6 @@
 *.zip
 
 *.pyc
+*.egg-info
 
 venv/
