@@ -37,10 +37,6 @@ def pretty_json(data):
 
 
 # For checking each row only has one label
-def is_length_one(arr):
-    return len(arr) == 1
-
-
 def has_only_one_item_per_row(series):
     return (series.apply(len) == 1).all()
 
