@@ -27,3 +27,10 @@ cd notebooks  # optional, can also navigate to the directory after running `jupy
 jupyter notebook
 ```
 
+### Run the tests
+The test files can be found in the `tests` directory. To run them, simply run the following.
+```
+cd caregivers
+pytest
+```
+
