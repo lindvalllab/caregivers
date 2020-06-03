@@ -15,7 +15,7 @@ def obfuscation():
     return '[** redacted **]'
 
 
-def test_preprocess_text(typical_note, obfuscation):
+def test_preprocess_text(typical_note):
     assert preprocess_text(typical_note) == 'the patient is a yo m who was '\
                                             'found down in on'
 
