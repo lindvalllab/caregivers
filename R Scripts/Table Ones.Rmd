@@ -1,0 +1,277 @@
+---
+title: "larger_cohort_analysis"
+output: html_document
+---
+
+### Utilities
+
+```{r}
+## Use tableone package for ease
+if (!require("tableone")){install.packages("tableone")}
+
+## to_hours
+## convert MIMIC-III date time format to hours
+to_hours <- function(some_time){
+  return(as.numeric(strptime(some_time, "%Y-%m-%d %H:%M:%S", tz = "EST"))/(60*60))
+}
+
+## Factor data which have a few levels
+factor_data <- function(dat){
+    ## Any row with levels less than the log of the number of rows
+    cols_to_factor <- sapply(dat, function(col) length(unique(col)) < log10(length(col) * 1000) )
+    dat[cols_to_factor] <- lapply(dat[cols_to_factor], factor)
+    return(dat)
+}
+```
+
+## Load Data
+
+```{r}
+dat <- read.csv("~/Desktop/CG_Data/caregivers/investigational_regex_results03Jun2020.csv", header = T, stringsAsFactors = F)
+
+## Rename age
+colnames(dat)[which(colnames(dat) == "ADMISSION_AGE")] <- "AGE"
+
+colnames(dat)[which(colnames(dat) == "ADMISSION_SOFA")] <- "SOFA_SCORE"
+
+colnames(dat)[which(colnames(dat) == "ADMISSION_TYPE")] <- "ADMIT_TYPE"
+
+colnames(dat)[which(colnames(dat) == "ADMISSION_LOCATION")] <- "ADMIT_LOCATION"
+
+## Rename "DURATION HOURS" to refer to mechvent
+colnames(dat)[which(colnames(dat) == "DURATION_HOURS")] <- "VENT_DURATION_HOURS"
+
+## Vasopressors-- correct NA to 0
+dat$VASOPRESSOR_DURATION_HOURS <- ifelse(is.na(dat$VASOPRESSOR_DURATION_HOURS), 0, dat$VASOPRESSOR_DURATION_HOURS)
+```
+
+## Create First 48 Variables
+
+```{r}
+SPOUSE_FIRST_48 <- vector()
+CHILD_FIRST_48 <- vector()
+
+for (i in 1:nrow(dat)){
+  if ((dat$SPOUSE[i] == 1) & (dat$CHART_HRS_SINCE_ADMIT[i] <= 48)){
+    SPOUSE_FIRST_48 <- c(SPOUSE_FIRST_48, 1)
+  } else {
+    SPOUSE_FIRST_48 <- c(SPOUSE_FIRST_48, 0)
+  }
+  
+  if ((dat$CHILD[i] == 1) & (dat$CHART_HRS_SINCE_ADMIT[i] <= 48)){
+    CHILD_FIRST_48 <- c(CHILD_FIRST_48, 1)
+  } else {
+    CHILD_FIRST_48 <- c(CHILD_FIRST_48, 0)
+  }
+}
+
+dat <- cbind(dat, SPOUSE_FIRST_48, CHILD_FIRST_48)
+
+## Clean environment
+rm(SPOUSE_FIRST_48, CHILD_FIRST_48, i)
+```
+
+### Create mortality info
+
+```{r}
+## Generate date data in DAYS
+dat$DAYS_UNTIL_DEATH_DISCH <- (to_hours(dat$DOD) - to_hours(dat$DISCHTIME))/24
+
+## Correct negatives (in-hospital mortality)
+dat$DAYS_UNTIL_DEATH_DISCH <- ifelse(dat$DAYS_UNTIL_DEATH_DISCH < 0, 0, dat$DAYS_UNTIL_DEATH_DISCH)
+## Correct for those who didn't pass away-- correct to maximum survival time
+dat$DAYS_UNTIL_DEATH_DISCH <- ifelse(is.na(dat$DAYS_UNTIL_DEATH_DISCH), max(dat$DAYS_UNTIL_DEATH_DISCH, na.rm = T), dat$DAYS_UNTIL_DEATH_DISCH)
+
+dat$MORT_3MO <- ifelse(dat$DAYS_UNTIL_DEATH_DISCH <= 90, 1, 0)
+dat$MORT_3MO <- ifelse(is.na(dat$MORT_3MO), 0, dat$MORT_3MO)
+
+dat$MORT_1YR <- ifelse(dat$DAYS_UNTIL_DEATH_DISCH <= 365, 1, 0)
+dat$MORT_1YR <- ifelse(is.na(dat$MORT_1YR), 0, dat$MORT_1YR)
+```
+
+## Cleaning
+
+```{r}
+## Reduce the number of ethnicities by scoping outward
+dat[(grepl("WHITE", dat$ETHNICITY)),]$ETHNICITY <- "WHITE"
+dat[(grepl("BLACK", dat$ETHNICITY)),]$ETHNICITY <- "BLACK"
+dat[(grepl("HISPANIC", dat$ETHNICITY)),]$ETHNICITY <- "HISPANIC"
+dat[(grepl("ASIAN", dat$ETHNICITY)),]$ETHNICITY <- "ASIAN"
+dat[(grepl("PORTUGUESE", dat$ETHNICITY)),]$ETHNICITY <- "WHITE"
+dat[(grepl("MIDDLE|NATIVE|MULTI|DECLINED|UNABLE|OTHER|NOT", dat$ETHNICITY)),]$ETHNICITY <- "UNKNOWN/OTHER"
+
+## Change levels for tabulation
+## Admission Location
+dat[(grepl("REFERRAL", dat$ADMISSION_LOCATION)),]$ADMIT_LOCATION <- "PHYS/CLINIC REFERRAL"
+dat[(grepl("TRANSFER", dat$ADMISSION_LOCATION)),]$ADMIT_LOCATION <- "TRANSFER FROM HOSP/SNF"
+
+## Discharge Location
+## Rehab = SNF
+dat$DISCHARGE_LOCATION <- ifelse(dat$DISCHARGE_LOCATION == "REHAB/DISTINCT PART HOSP", "SNF", dat$DISCHARGE_LOCATION)
+## Aggregate SHORT TERM HOSPITAL and OTHER
+dat$DISCHARGE_LOCATION <- ifelse(dat$DISCHARGE_LOCATION == "SHORT TERM HOSPITAL", "SHORT TERM HOSPITAL/OTHER", dat$DISCHARGE_LOCATION)
+dat$DISCHARGE_LOCATION <- ifelse(dat$DISCHARGE_LOCATION == "OTHER FACILITY", "SHORT TERM HOSPITAL/OTHER", dat$DISCHARGE_LOCATION)
+
+## Hospice
+dat[(grepl("HOSPICE", dat$DISCHARGE_LOCATION)),]$DISCHARGE_LOCATION <- "HOSPICE"
+## DISC ~= HOME HEALTH
+dat[(grepl("DISC", dat$DISCHARGE_LOCATION)),]$DISCHARGE_LOCATION <- "HOME HEALTH CARE"
+## Home = Home/Home Health
+dat[(grepl("HOME", dat$DISCHARGE_LOCATION)),]$DISCHARGE_LOCATION <- "HOME/HOME HEALTH CARE"
+## Left = Home
+dat[(grepl("LEFT", dat$DISCHARGE_LOCATION)),]$DISCHARGE_LOCATION <- "HOME/HOME HEALTH CARE"
+
+## Language
+dat$LANGUAGE <- ifelse(dat$LANGUAGE == "ENGL", "ENGLIST", "OTHER")
+```
+
+## Drop unnecessary variables
+
+```{r}
+dat <- dat[,!(colnames(dat) %in% c("ADMITTIME",
+               "DISCHTIME",
+               "DOD",
+               "DEATHTIME",
+               "EDREGTIME",
+               "EDOUTTIME",
+               "DIAGNOSIS",
+               "HAS_CHARTEVENTS_DATA",
+               "DOB",
+               "DOD_HOSP",
+               "DOD_SSN",
+               "EXPIRE_FLAG",
+               "INTIME",
+               "OUTTIME",
+               "DBSOURCE",
+               "ROW_ID",
+               "LAST_CAREUNIT",
+               "FIRST_WARDID",
+               "LAST_WARDID",
+               "LOS",
+               "RELIGION",
+               "VENTNUM",
+               "STARTTIME",
+               "ENDTIME",
+               "CHARTDATE",
+               "CHARTTIME",
+               "STORETIME",
+               "TEXT",
+               "DESCRIPTION",
+               ## Maybe keep category..
+               "CATEGORY",
+               "CGID",
+               "CHILD",
+               "SPOUSE",
+               "ISERROR"))]
+```
+
+### Elixhauser Score
+
+```{r}
+dat$ELIXHAUSER_SCORE <- apply(dat[,grepl("ADMISSION_", colnames(dat))], 1, sum)
+```
+
+## Aggregate data to Hospital Admission Level
+
+```{r}
+tmp <- aggregate(cbind(CHILD_FIRST_48,
+                       SPOUSE_FIRST_48,
+                       MORT_1YR,
+                       MORT_3MO,
+                       HOSPITAL_EXPIRE_FLAG,
+                       AGE,
+                       VENT_DURATION_HOURS,
+                       VASOPRESSOR_DURATION_HOURS,
+                       LOS_HOSPITAL,
+                       LOS_ICU,
+                       HOSPSTAY_SEQ,
+                       RRT_D1,
+                       ELIXHAUSER_SCORE,
+                       SOFA_SCORE,
+                       ADMISSION_CONGESTIVE_HEART_FAILURE, 
+                       ADMISSION_CARDIAC_ARRHYTHMIAS,
+                       ADMISSION_VALVULAR_DISEASE,
+                       ADMISSION_PULMONARY_CIRCULATION, 
+                       ADMISSION_PERIPHERAL_VASCULAR, 
+                       ADMISSION_HYPERTENSION, 
+                       ADMISSION_PARALYSIS, 
+                       ADMISSION_OTHER_NEUROLOGICAL, 
+                       ADMISSION_CHRONIC_PULMONARY, 
+                       ADMISSION_DIABETES_UNCOMPLICATED, 
+                       ADMISSION_DIABETES_COMPLICATED, 
+                       ADMISSION_HYPOTHYROIDISM, 
+                       ADMISSION_RENAL_FAILURE, 
+                       ADMISSION_LIVER_DISEASE, 
+                       ADMISSION_PEPTIC_ULCER, 
+                       ADMISSION_AIDS, 
+                       ADMISSION_LYMPHOMA, 
+                       ADMISSION_METASTATIC_CANCER, 
+                       ADMISSION_SOLID_TUMOR, 
+                       ADMISSION_RHEUMATOID_ARTHRITIS, 
+                       ADMISSION_COAGULOPATHY, 
+                       ADMISSION_OBESITY, 
+                       ADMISSION_WEIGHT_LOSS, 
+                       ADMISSION_FLUID_ELECTROLYTE, 
+                       ADMISSION_BLOOD_LOSS_ANEMIA, 
+                       ADMISSION_DEFICIENCY_ANEMIAS, 
+                       ADMISSION_ALCOHOL_ABUSE, 
+                       ADMISSION_DRUG_ABUSE, 
+                       ADMISSION_PSYCHOSES, 
+                       ADMISSION_DEPRESSION) ~
+                       GENDER +
+                   ETHNICITY +
+                   LANGUAGE +
+                   MARITAL_STATUS +
+                   FIRST_CAREUNIT +
+                   FIRST_ICU_STAY +
+                   ADMIT_LOCATION +
+                   DISCHARGE_LOCATION +
+                   SUBJECT_ID + 
+                   HADM_ID +
+                   ICUSTAY_ID, data = dat, FUN = max)
+
+## NOTE: 1 pt has no ELIXHAUSER, and will be removed
+
+## Remove unnecesary columns
+tmp$SUBJECT_ID <- NULL
+tmp$HADM_ID <- NULL
+tmp$ICUSTAY_ID <- NULL
+
+## Corect hospstay seq
+tmp$HOSPSTAY_SEQ <- ifelse(tmp$HOSPSTAY_SEQ >= 5, "5+", tmp$HOSPSTAY_SEQ)
+
+## Factor
+tmp <- factor_data(tmp)
+
+tmp$DISCHARGE_LOCATION <- factor(tmp$DISCHARGE_LOCATION)
+```
+
+
+```{r}
+## Define non normal variables
+non_normal <- c("AGE", 
+                "VENT_DURATION_HOURS",
+                "VASOPRESSOR_DURATION_HOURS",
+                "SOFA_SCORE",
+                "ELIXHAUSER_SCORE",
+                "LOS_HOSPITAL",
+                "LOS_ICU")
+
+```
+
+
+```{r}
+overall_tab <- CreateTableOne(data = tmp)
+
+write.csv(print(overall_tab, non_normal = non_normal, quote = F, noSpaces = T, showAllLevels = TRUE), file = "~/Desktop/CG_Data/caregivers/overall_table_one03Jun2020.csv")
+
+child_tab <- CreateTableOne(data = tmp, strata = "CHILD_FIRST_48")
+
+write.csv(print(child_tab, nonnormal = non_normal, 
+                quote = F, noSpaces = T, showAllLevels = T), file = "~/Desktop/CG_Data/caregivers/child_table_one03Jun2020.csv")
+
+spouse_tab <- CreateTableOne(data = tmp, strata = "SPOUSE_FIRST_48")
+
+write.csv(print(spouse_tab, nonnormal = non_normal, 
+                quote = F, noSpaces = T, showAllLevels = T), file = "~/Desktop/CG_Data/caregivers/Spouse_table_one03Jun2020.csv")
+```

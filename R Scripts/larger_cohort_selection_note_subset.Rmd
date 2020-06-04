@@ -1,0 +1,398 @@
+---
+title: "Family Communication-Enriched Notes"
+output: html_document
+---
+
+## Strategy
+
+1. All ICU Admissions
+2. Remove pts with missing CHARTEVENTS data
+3. Remove pts younger than 18
+4. Keep only pts who were mechanically ventilated during their admission
+5. Remove pts without any notes associated with their admission or notes logged in error
+6. Keep only pts with physicians' notes associated with their admission (2008-2012)
+
+### Utility Functions
+
+```{r, echo = F}
+## Rename columns, avoiding some
+rename <- function(dat, avoid_names, prefix){
+        for (name in colnames(dat)[!(colnames(dat) %in% avoid_names)]){
+            colnames(dat)[which(colnames(dat) == name)] <- paste(prefix, name, sep = '')
+        }
+    return(dat)
+}
+
+```
+
+#### clean_text
+
+```{r}
+clean_text <- function(tokens, printout){
+    #Create a fake patient note phrase as a representative sample
+    ex_token <- "Example note:\nThe patient is a 81yo m who was found down in [** location **] on [** date **] by daughter, [** name **].\n Pt was in usual state of health until four days ago, when began to complain to family of heartburn for which the pt was taking tums in addition to his prescribed PPI, without resolution."
+  if (printout){
+    print(substr(ex_token, 1, 100))
+  }
+  
+  #Remove carriage returns, convert to lower
+  tokens <- tolower(gsub('\r', ' ', tokens))
+  tokens <- tolower(gsub('\n', ' ', tokens))
+  ex_token <- tolower(gsub('\n', ' ', ex_token))
+  if (printout){
+    cat("Result after removing carriage returns:\n")
+    print(substr(ex_token, 1, 100))
+  }
+  
+  #https://stackoverflow.com/questions/13529360/replace-text-within-parenthesis-in-r
+  #Remove obfuscations between '[' and ']'
+  tokens <- gsub(" *\\[.*?\\] *", ' ', tokens)
+  ex_token <- gsub(" *\\[.*?\\] *", ' ', ex_token)
+  if (printout){
+    cat("Result after leaving [obfuscation]:\n")
+    print(substr(ex_token, 1, 100))
+  }
+  
+  #Keep only words & numeric
+  tokens <- gsub("[^[:alnum:][:space:]]", '', tokens)
+  ex_token <- gsub("[^[:alnum:][:space:]]", '', ex_token)
+  if (printout){
+    cat("Result after removing all but alphanumeric and spaces:\n")
+    print(substr(ex_token, 1, 100))
+  }
+  
+  #Keep only a single white space
+  #https://stackoverflow.com/questions/25707647/merge-multiple-spaces-to-single-space-remove-trailing-leading-spaces
+  tokens <- gsub("(?<=[\\s])\\s*|^\\s+|\\s+$", '', tokens, perl=TRUE)
+  ex_token <- gsub("(?<=[\\s])\\s*|^\\s+|\\s+$", '', ex_token, perl=TRUE)
+  if (printout){
+    cat("Result after keeping only single spaces:\n")
+    print(substr(ex_token, 1, 100))
+  }
+  
+  ## Drop all whitespace
+  tokens <- gsub(' ', '', tokens)
+  
+  return(tokens)
+}
+```
+
+# Demographic and Cohort Data
+
+## Load Admission Data & Initial Cleaning
+
+Load `ADMISSIONS`, `PATIENTS`, and `ICUSTAYS` for cohort data. Load `icustay_detail` for more derived data. __Note:__ `icustay_detail` data are derived from `ICUSTAYS`
+
+```{r}
+## Load ADMISSIONS Table to join on HADM_ID
+adm <- read.csv("~/MIMIC-III/ADMISSIONS.csv", 
+                header = T, stringsAsFactors = F)
+
+## Load PATIENTS Table to join on SUBJECT_ID
+pat <- read.csv("~/MIMIC-III/PATIENTS.csv", 
+                header = T, stringsAsFactors = F)
+
+## Load ICUSTAYS Table to join on SUBJECT_ID, HADM_ID
+stays <- read.csv("~/MIMIC-III/ICUSTAYS.csv", 
+                  header = T, stringsAsFactors = F)
+
+## Load icustay_detail to join with ICUSTAYS
+## Note: icustay_detail is a derived table
+stays_detail <- read.csv("~/MIMIC-III/icustay_detail.csv", 
+                         header = T, stringsAsFactors = F)
+## Convert colnames to uppercase
+colnames(stays_detail) <- toupper(colnames(stays_detail))
+```
+
+## Initial Cohort (Derived from ICUSTAYS)
+
+As all patients must be acutely ill, we will begin at the ICU level.
+
+```{r}
+cat("There are", length(unique(stays$SUBJECT_ID)), "unique patients in this cohort.\n")
+cat("There are", length(unique(stays$HADM_ID)), "unique hospital admissions associated with this cohort.\n")
+cat("There are", length(unique(stays$ICUSTAY_ID)), "unique ICUSTAYs in this cohort.\n")
+
+## If they are not in the detailed stays table, it's because they are missing data
+cat(length(unique(stays$SUBJECT_ID)) - length(unique(stays_detail$SUBJECT_ID)), "Patients were removed for having no CHARTEVENTS data.\n")
+cat(length(unique(stays$HADM_ID)) - length(unique(stays_detail$HADM_ID)), "HOSPITAL ADMISSIONS are missing CHARTEVENTS data.\n")
+cat(length(unique(stays$ICUSTAY_ID)) - length(unique(stays_detail$ICUSTAY_ID)), "ICUSTAYs are missing CHARTEVENTS data.\n")
+```
+
+### Merging Admission, Patient, and ICU Data
+
+1. Remove `ROW_ID`, which is an index peculiar to each table.
+2. Join `ICUSTAYS` to derived `ICUSTAYS_DETAIL` table on tabular intersection. `ICUSTAYS` contains information that the derived `ICUSTAYS_DETAIL` does not.
+3. Join `ADMISSIONS` to `PATIENTS` on `SUBJECT_ID` for `GENDER`, `DOB`, `DOD` info.
+4. Join `ICUSTAYS` to `PATIENTS` and `ADMISSIONS` on tabular intersection.
+
+```{r}
+## (1)
+adm$ROW_ID <- NULL
+pat$ROW_ID <- NULL
+stays$ROW_ID <- NULL
+
+## (2)
+stays <- merge(stays, stays_detail, by = intersect(colnames(stays), colnames(stays_detail)))
+
+## Clean stays_detail
+rm(stays_detail)
+
+## (3)
+tmp <- merge(adm, pat, by = "SUBJECT_ID")
+dim(tmp)
+
+## Clean
+rm(adm, pat)
+
+## (4)
+tmp <- merge(tmp, stays, by = intersect(colnames(tmp), colnames(stays)))
+dim(tmp)
+
+## Clean
+rm(stays)
+
+## Look again for pt, hadm, icustay numbers
+cat("There are", length(unique(tmp$SUBJECT_ID)), "unique patients in this cohort.\n")
+cat("There are", length(unique(tmp$HADM_ID)), "unique hospital admissions in this cohort.\n")
+cat("There are", length(unique(tmp$ICUSTAY_ID)), "unique ICUSTAYs in this cohort.\n")
+
+dat <- tmp
+rm(tmp)
+```
+
+### Correct Nonagenarian Ages and Remove patients younger than 18 years of age
+
+```{r}
+## Correct nonagenarian ages by imputing median age (91.4)
+dat[(dat$ADMISSION_AGE >= 90), ]$ADMISSION_AGE <- 91.4
+
+## Remove patients youner than 18
+tmp <- dat[(dat$ADMISSION_AGE >= 18), ]
+
+cat(length(unique(dat$SUBJECT_ID)) - length(unique(tmp$SUBJECT_ID)), "patients below the age of 18 removed.\n")
+cat(length(unique(dat$HADM_ID)) - length(unique(tmp$HADM_ID)), "hospital admissions for patients below the age of 18 removed.\n")
+cat(length(unique(dat$ICUSTAY_ID)) - length(unique(tmp$ICUSTAY_ID)), "ICU stays for patients below the age of 18 removed.\n")
+
+## dat gets tmp, remove tmp
+dat <- tmp
+rm(tmp)
+
+cat("There are", length(unique(dat$SUBJECT_ID)), "unique patients in this cohort.\n")
+cat("There are", length(unique(dat$HADM_ID)), "unique hospital admissions in this cohort.\n")
+cat("There are", length(unique(dat$ICUSTAY_ID)), "unique ICUSTAYs in this cohort.\n")
+```
+
+## Check Ventilator Use
+
+1. Load `ventdurations` (derived table)
+2. Merge data, thus removing any patients which have no ventilation events
+
+```{r}
+## (1)
+## ventdurations
+vent <- read.csv("~/MIMIC-III/ventdurations.csv", header = T, stringsAsFactors = F)
+
+## Convert column names to uppercase
+colnames(vent) <- toupper(colnames(vent))
+
+## (2)
+## Remove patients with no ventilation data
+tmp <- merge(dat, vent, by = "ICUSTAY_ID")
+
+## Print numbers
+cat(length(unique(dat$SUBJECT_ID)) - length(unique(tmp$SUBJECT_ID)), "patients removed for never being on a ventilator.\n")
+cat(length(unique(dat$HADM_ID)) - length(unique(tmp$HADM_ID)), "hospital admissions removed for not being associated with ventilator use.\n")
+cat(length(unique(dat$ICUSTAY_ID)) - length(unique(tmp$ICUSTAY_ID)), "ICU stays removed for not being associated with ventilator use.\n")
+
+## dat gets tmp, remove tmp
+dat <- tmp
+rm(tmp, vent)
+
+## Print
+cat("There are", length(unique(dat$SUBJECT_ID)), "unique patients in this cohort.\n")
+cat("There are", length(unique(dat$HADM_ID)), "unique hospital admissions in this cohort.\n")
+cat("There are", length(unique(dat$ICUSTAY_ID)), "unique ICUSTAYs in this cohort.\n")
+```
+
+## Keep only MICU
+
+```{r}
+dat <- dat[dat$FIRST_CAREUNIT == "MICU", ]
+
+cat("There are", length(unique(dat$SUBJECT_ID)), "unique patients in this cohort.\n")
+cat("There are", length(unique(dat$HADM_ID)), "unique hospital admissions in this cohort.\n")
+cat("There are", length(unique(dat$ICUSTAY_ID)), "unique ICUSTAYs in this cohort.\n")
+```
+
+## Notes
+
+```{r}
+## Load NOTEEVENTS table
+notes <- read.csv("~/MIMIC-III/NOTEEVENTS.csv", header = T, stringsAsFactors = F)
+```
+
+### Join and Remove Notes
+
+```{r}
+tmp <- merge(dat, notes, by = c("SUBJECT_ID", "HADM_ID"))
+
+## Clean environment
+rm(notes)
+
+## Remove notes marked ISERROR
+tmp <- tmp[is.na(tmp$ISERROR), ]
+
+## 
+cat(length(unique(dat$SUBJECT_ID)) - length(unique(tmp$SUBJECT_ID)), "patients removed as not having notes or having marked errors.\n")
+cat(length(unique(dat$HADM_ID)) - length(unique(tmp$HADM_ID)), "hospital admissions removed as not having notes or having marked errors.\n")
+cat(length(unique(dat$ICUSTAY_ID)) - length(unique(tmp$ICUSTAY_ID)), "ICU stays removed as not having notes or having marked errors.\n")
+
+## dat gets tmp, remove tmp
+dat <- tmp
+rm(tmp)
+
+## Print
+cat("There are", length(unique(dat$SUBJECT_ID)), "unique patients in this cohort.\n")
+cat("There are", length(unique(dat$HADM_ID)), "unique hospital admissions in this cohort.\n")
+cat("There are", length(unique(dat$ICUSTAY_ID)), "unique ICUSTAYs in this cohort.\n")
+```
+
+### Check and Subset Physician Notes (2008-2012)
+
+Include social work/case management
+
+```{r}
+table(dat$CATEGORY)
+
+## Subset pts with physicians' or Nursing notes
+tmp <- dat[(dat$CATEGORY == "Physician " | dat$CATEGORY == "Nursing" | dat$CATEGORY == "Case Management " | dat$CATEGORY == "Social Work"), ]
+
+## 
+cat(length(unique(dat$SUBJECT_ID)) - length(unique(tmp$SUBJECT_ID)), "patients removed as not having Physicians' notes.\n")
+cat(length(unique(dat$HADM_ID)) - length(unique(tmp$HADM_ID)), "hospital admissions removed as not having Physicians' notes.\n")
+cat(length(unique(dat$ICUSTAY_ID)) - length(unique(tmp$ICUSTAY_ID)), "ICU stays removed as not having Physicians' notes.\n")
+
+## dat gets tmp, remove tmp
+dat <- tmp
+rm(tmp)
+
+## Print
+cat("There are", length(unique(dat$SUBJECT_ID)), "unique patients in this cohort.\n")
+cat("There are", length(unique(dat$HADM_ID)), "unique hospital admissions in this cohort.\n")
+cat("There are", length(unique(dat$ICUSTAY_ID)), "unique ICUSTAYs in this cohort.\n")
+```
+
+## Cleaning
+
+```{r}
+## keep other variables in tmp for now
+## Clean everything but alphanumeric from text
+dat$STRIPPED_TEXT <- clean_text(dat$TEXT, TRUE)
+```
+
+## Remove Exact Duplicates
+
+```{r}
+tmp <- dat[!(duplicated(dat$STRIPPED_TEXT)),]
+
+## 
+cat(length(unique(dat$SUBJECT_ID)) - length(unique(tmp$SUBJECT_ID)), "patients removed as duplicate-note having.\n")
+cat(length(unique(dat$HADM_ID)) - length(unique(tmp$HADM_ID)), "hospital admissions removed as duplicate-note having.\n")
+cat(length(unique(dat$ICUSTAY_ID)) - length(unique(tmp$ICUSTAY_ID)), "ICU stays removed as duplicate-note having.\n")
+
+## dat gets tmp, remove tmp
+dat <- tmp
+rm(tmp)
+
+## Remove
+dat$STRIPPED_TEXT <- NULL
+
+## Print
+cat("There are", length(unique(dat$SUBJECT_ID)), "unique patients in this cohort.\n")
+cat("There are", length(unique(dat$HADM_ID)), "unique hospital admissions in this cohort.\n")
+cat("There are", length(unique(dat$ICUSTAY_ID)), "unique ICUSTAYs in this cohort.\n")
+cat("There are", length(unique(dat$TEXT)), "unique TEXTS in this cohort.\n")
+```
+
+## CHARTTIME_HRS_SINCE_ADMIT
+
+```{r}
+## CHARTTIME - ADMITTIME
+dat$CHART_HRS_SINCE_ADMIT <- (as.numeric(strptime(dat$CHARTTIME, "%Y-%m-%d %H:%M:%S", tz = "EST")) - 
+                                as.numeric(strptime(dat$ADMITTIME, "%Y-%m-%d %H:%M:%S", tz = "EST")))/60/60
+```
+
+### Additional Tables
+
+#### Renal Replacement Therapy on Day One
+
+```{r}
+## Hold dat in tmp for now
+tmp <- dat
+
+rrtd1 <- read.csv("~/MIMIC-III/rrtfirstday.csv", header = T, stringsAsFactors = F)
+colnames(rrtd1) <- toupper(colnames(rrtd1))
+rrtd1 <- aggregate(RRT ~ ICUSTAY_ID, data = rrtd1, FUN = max)
+colnames(rrtd1) <- c("ICUSTAY_ID", "RRT_D1")
+
+## Merge
+tmp <- merge(x = tmp, y = rrtd1, by = "ICUSTAY_ID", all.x = TRUE)
+
+rm(rrtd1)
+```
+
+#### Sequential Organ Failure Assessment (SOFA)
+
+```{r}
+sofa <- read.csv("~/MIMIC-III/sofa.csv", header = T, stringsAsFactors = F)
+colnames(sofa) <- toupper(colnames(sofa))
+
+## Subset
+sofa <- sofa[, c("SUBJECT_ID", "HADM_ID", "ICUSTAY_ID", "SOFA")]
+sofa <- rename(sofa, c("SUBJECT_ID", "HADM_ID", "ICUSTAY_ID"), "ADMISSION_")
+
+## Merge
+tmp <- merge(x = tmp, y = sofa, by = c("SUBJECT_ID", "HADM_ID", "ICUSTAY_ID"), all.x = TRUE)
+rm(sofa)
+```
+
+#### Elixhauser Comorbidities
+
+```{r}
+elixhauser <- read.csv("~/MIMIC-III/elixhauser.csv", header = T, stringsAsFactors = F)
+colnames(elixhauser) <- toupper(colnames(elixhauser))
+elixhauser <- rename(elixhauser, "HADM_ID", "ADMISSION_")
+
+## Merge
+tmp <- merge(x = tmp, y = elixhauser, by = "HADM_ID", all.x = TRUE)
+
+## Clean
+rm(elixhauser)
+```
+
+#### Vasopressors
+
+```{r}
+vaso <- read.csv("~/MIMIC-III/vasopressordurations.csv", header = T, stringsAsFactors = F)
+colnames(vaso) <- toupper(colnames(vaso))
+vaso <- rename(vaso, "ICUSTAY_ID", "VASOPRESSOR_")
+## Drop vasopressor count
+vaso$VASONUM <- NULL
+
+## Sum vasopressor time
+vaso <- aggregate(VASOPRESSOR_DURATION_HOURS ~ ICUSTAY_ID, data = vaso, FUN = sum)
+
+## Merge back to data
+tmp <- merge(x = tmp, y = vaso, by = c("ICUSTAY_ID"), all.x = TRUE)
+
+## Clean
+rm(vaso)
+```
+
+### Write
+
+```{r}
+# write.csv(tmp, file = "~/Desktop/CG_Data/caregivers_micu_noteevents02Jun20.csv", row.names = F)
+```
+
