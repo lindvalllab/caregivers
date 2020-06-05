@@ -7,8 +7,8 @@ def remove_redactions(text):
 
 
 def remove_carriage_returns(text):
-    return text.replace('\r', '')\
-               .replace('\n', '')
+    return text.replace(r'\r', '')\
+               .replace(r'\n', '')
 
 
 def remove_repeated_spaces(text):
