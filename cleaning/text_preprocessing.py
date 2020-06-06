@@ -3,12 +3,12 @@ import re
 
 def remove_redactions(text):
     '''Remove obfuscations between square brackets.'''
-    return re.sub(r'\[.*?\]', '', text)
+    return re.sub(r'\[.*?\]', ' ', text)
 
 
 def remove_carriage_returns(text):
-    return text.replace(r'\r', '')\
-               .replace(r'\n', '')
+    return text.replace(r'\r', ' ')\
+               .replace(r'\n', ' ')
 
 
 def remove_repeated_spaces(text):
@@ -28,7 +28,7 @@ def remove_carriage_returns_and_repeated_spaces(text):
 def remove_non_alphabetic(text):
     '''Remove all non-alphabetic characters, including digits and punctuation.
        Excludes spaces.'''
-    return re.sub(r'[^a-zA-Z\s]', '', text)
+    return re.sub(r'[^a-zA-Z\s]', ' ', text)
 
 
 def preprocess_text(text):
