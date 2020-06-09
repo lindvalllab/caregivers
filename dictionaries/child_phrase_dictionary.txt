@@ -1,0 +1,200 @@
+child
+childs
+child's
+childs'
+children
+childrens
+children's
+childrens'
+son
+sons
+son's
+sons'
+daughter
+daughters
+daughter's
+daughters'
+kid
+kids
+kid's
+kids'
+step-child
+step-childs
+step-child's
+step-childs'
+step-daughter
+step-daughters
+step-daughter's
+step-daughters'
+step-son
+step-sons
+step-son's
+step-sons'
+stepchild
+stepchilds
+stepchild's
+stepchilds'
+stepdaughter
+stepdaughters
+stepdaughter's
+stepdaughters'
+stepson
+stepsons
+stepson's
+stepsons'
+adopted daughter
+adopted child
+grandchild
+grandchilds
+grandchild's
+grandchilds'
+grandchildren
+grandchildrens
+grandchildren's
+grandchildrens'
+grandson
+granddaughter
+grandkid
+grandkids
+grandkid's
+grandkids'
+teen
+teens
+teen's
+teens'
+teenager
+teenagers
+teenager's
+teenagers'
+boy
+boys
+boy's
+boys'
+girl
+girls
+girl's
+girls'
+ y/o
+ y/os
+ y/o's
+ y/os'
+-y/o
+-y/os
+-y/o's
+-y/os'
+ year old
+ year olds
+ year old's
+ year olds'
+ year-old
+ year-olds
+ year-old's
+ year-olds'
+-year old
+-year olds
+-year old's
+-year olds'
+-year-old
+-year-olds
+-year-old's
+-year-olds'
+offspring
+offsprings
+offspring's
+offsprings'
+descendent
+descendents
+descendent's
+descendents'
+young one
+young ones
+young one's
+young ones'
+little one
+little ones
+little one's
+little ones'
+youngster
+youngsters
+youngster's
+youngsters'
+juvenile
+juveniles
+juvenile's
+juveniles'
+young folk
+young folks
+young folk's
+young folks'
+daugh
+daughs
+daugh's
+daughs'
+daught
+daughts
+daught's
+daughts'
+adolescent
+adolescents
+adolescent's
+adolescents'
+daughter-in-law
+daughters-in-law
+daughter-in-laws
+daughter-in-law's
+daughter-in-laws'
+daughter in-law
+daughters in-law
+daughter in-laws
+daughter in-law's
+daughter in-laws'
+daughter-in law
+daughters-in law
+daughter-in laws
+daughter-in law's
+daughter-in laws'
+daughter in law
+daughters in law
+daughter in laws
+daughter in law's
+daughter in laws'
+son-in-law
+sons-in-law
+son-in-laws
+son-in-law's
+son-in-laws'
+son in-law
+sons in-law
+son in-laws
+son in-law's
+son in-laws'
+son-in law
+sons-in law
+son-in laws
+son-in law's
+son-in laws'
+son in law
+sons in law
+son in laws
+son in law's
+son in laws'
+daughter-IL
+daughters-IL
+daughter-ILs
+daughter-IL's
+daughter-ILs'
+daughter IL
+daughters IL
+daughter ILs
+daughter IL's
+daughter ILs'
+son-IL
+sons-IL
+son-ILs
+son-IL's
+son-ILs'
+son IL
+sons IL
+son ILs
+son IL's
+son ILs'
