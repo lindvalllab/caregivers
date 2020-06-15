@@ -56,3 +56,4 @@ def squish_dataframe(df, group_by, dropna=True):
                 else list for col in df.columns if col != group_by}
 
     return df.groupby(group_by).agg(aggfuncs).reset_index()
+
