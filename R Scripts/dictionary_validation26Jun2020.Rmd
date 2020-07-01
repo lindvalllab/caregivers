@@ -1,0 +1,54 @@
+---
+title: "Caregivers Dictionary Validation"
+output: html_document
+---
+
+## Strategy
+
+1. We have looked at an annotation cohort of all ventilated patients' Physician/Nursing notes to create a keyword dictionary optimized on sensitivity
+
+2. These dictionaries, `child` and `spouse`, will now be validated on random, semi-overlapping, 1000-note samples with the purpose of optimizing on specificity
+
+3. These samples focus on the Medical ICU, include Social Work and Case Management notes, but remain focused on the first 48hrs of the hospital admission
+
+## Load Annotation Cohort Set
+### Annotation Cohort is Enriched with Concepts
+
+```{r}
+## Load Data
+dat <- read.csv("~/caregivers/data/first_48_entire_cohort26Jun2020.csv", header = T, stringsAsFactors = F)
+
+## Subset minimum necessary variables: ROW_ID, TEXT
+dat <- dat[ ,c("ROW_ID", "TEXT")]
+
+## Randomize notes
+## First set seed
+set.seed(1337)
+dat <- dat[sample(1:nrow(dat)),]
+
+## Write the resulting data
+write.csv(dat, file = "~/caregivers/data/keyword_dict_investigation_set26Jun2020.csv", row.names = F)
+
+## Sample 1000 for each person
+write.csv(dat[1:1000,], file = "~/Desktop/caregivers annotation/caregivers_notes_1_26Jun2020.csv", row.names = F)
+
+write.csv(dat[900:1899,], file = "~/Desktop/caregivers annotation/caregivers_notes_2_26Jun2020.csv", row.names = F)
+
+write.csv(dat[c(900:1000, 1900:2798),], file = "~/Desktop/caregivers annotation/caregivers_notes_3_26Jun2020.csv", row.names = F)
+```
+
+## Dictionaries
+
+Dictionaries focus on key terms which indicate communication with persons in the ICU
+
+```{r, warning=FALSE}
+child <- unique(clean_text(readLines("~/caregivers/dictionaries/child12Jun2020.txt"), F))
+
+child <- readLines("~/caregivers/dictionaries/child12Jun2020.txt")
+
+write(child, file = '~/caregivers/dictionaries/child_dict_25Jun2020.txt', sep = ',', ncolumns = length(child))
+
+spouse <- readLines("~/caregivers/dictionaries/spouse12Jun2020.txt")
+
+write(spouse, file = '~/caregivers/dictionaries/spouse_dict_25Jun2020.txt', sep = ',', ncolumns = length(spouse))
+```

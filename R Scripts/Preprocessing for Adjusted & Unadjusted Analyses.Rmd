@@ -1,0 +1,302 @@
+---
+title: "Caregivers Regression Analysis"
+output: html_document
+---
+
+# Overall Questions:
+
+### Helper Functinos
+
+```{r}
+library(sjPlot)
+library(sjstats)
+
+model_info <- function(fit){
+  model_sum <- summary(fit)
+  odds_ratio <- cbind(OR = exp(fit$coef), exp(confint(fit)))
+  my_list <- list(model_sum, odds_ratio)
+  names(my_list) <- c("Model Summary", "OR Summary")
+  return(my_list)
+}
+
+## to_hours
+## convert MIMIC-III date time format to hours
+to_hours <- function(some_time){
+  return(as.numeric(strptime(some_time, "%Y-%m-%d %H:%M:%S", tz = "EST"))/(60*60))
+}
+
+## Factor data which have a few levels
+factor_data <- function(dat){
+    ## Any row with levels less than the log of the number of rows
+    cols_to_factor <- sapply(dat, function(col) length(unique(col)) < log10(length(col) * 1000) )
+    dat[cols_to_factor] <- lapply(dat[cols_to_factor], factor)
+    return(dat)
+}
+
+
+```
+
+
+## Load data, Rename some Columns
+
+```{r}
+dat <- read.csv('~/caregivers/data/processed/investigational_regex_results03Jun2020.csv', header = T, stringsAsFactors = F)
+
+## Rename to avoid the term "ADMISSION" which will be used elsewhere
+colnames(dat)[which(colnames(dat) == "ADMISSION_AGE")] <- "AGE"
+colnames(dat)[which(colnames(dat) == "ADMISSION_SOFA")] <- "SOFA_SCORE"
+colnames(dat)[which(colnames(dat) == "ADMISSION_TYPE")] <- "ADMIT_TYPE"
+colnames(dat)[which(colnames(dat) == "ADMISSION_LOCATION")] <- "ADMIT_LOCATION"
+
+## Rename "DURATION HOURS" to refer to mechvent
+colnames(dat)[which(colnames(dat) == "DURATION_HOURS")] <- "VENT_DURATION_HOURS"
+## Drop old data for sanity's sake
+dat$VENT_DURATION_HOURS <- NULL
+
+## Vasopressors-- correct NA to 0
+dat$VASOPRESSOR_DURATION_HOURS <- ifelse(is.na(dat$VASOPRESSOR_DURATION_HOURS), 0, dat$VASOPRESSOR_DURATION_HOURS)
+```
+
+## Data Cleaning
+
+### Create First 48 Variables
+
+```{r}
+SPOUSE_FIRST_48 <- vector()
+CHILD_FIRST_48 <- vector()
+
+for (i in 1:nrow(dat)){
+  if ((dat$SPOUSE[i] == 1) & (dat$CHART_HRS_SINCE_ADMIT[i] <= 48)){
+    SPOUSE_FIRST_48 <- c(SPOUSE_FIRST_48, 1)
+  } else {
+    SPOUSE_FIRST_48 <- c(SPOUSE_FIRST_48, 0)
+  }
+  
+  if ((dat$CHILD[i] == 1) & (dat$CHART_HRS_SINCE_ADMIT[i] <= 48)){
+    CHILD_FIRST_48 <- c(CHILD_FIRST_48, 1)
+  } else {
+    CHILD_FIRST_48 <- c(CHILD_FIRST_48, 0)
+  }
+}
+
+dat <- cbind(dat, SPOUSE_FIRST_48, CHILD_FIRST_48)
+
+## Clean environment
+rm(SPOUSE_FIRST_48, CHILD_FIRST_48, i)
+```
+
+## Create mortality info
+
+```{r}
+## Generate date data in DAYS
+dat$DAYS_UNTIL_DEATH_DISCH <- (to_hours(dat$DOD) - to_hours(dat$DISCHTIME))/24
+
+## Correct negatives (in-hospital mortality)
+dat$DAYS_UNTIL_DEATH_DISCH <- ifelse(dat$DAYS_UNTIL_DEATH_DISCH < 0, 0, dat$DAYS_UNTIL_DEATH_DISCH)
+
+## Correct for those who didn't pass away-- correct to maximum survival time
+dat$DAYS_UNTIL_DEATH_DISCH <- ifelse(is.na(dat$DAYS_UNTIL_DEATH_DISCH), max(dat$DAYS_UNTIL_DEATH_DISCH, na.rm = T), dat$DAYS_UNTIL_DEATH_DISCH)
+
+dat$MORT_3MO <- ifelse(dat$DAYS_UNTIL_DEATH_DISCH <= 90, 1, 0)
+dat$MORT_3MO <- ifelse(is.na(dat$MORT_3MO), 0, dat$MORT_3MO)
+
+dat$MORT_1YR <- ifelse(dat$DAYS_UNTIL_DEATH_DISCH <= 365, 1, 0)
+dat$MORT_1YR <- ifelse(is.na(dat$MORT_1YR), 0, dat$MORT_1YR)
+```
+
+## Level Changes for Certain Data
+
+```{r}
+## Reduce the number of ethnicities by scoping outward
+dat[(grepl("WHITE", dat$ETHNICITY)),]$ETHNICITY <- "WHITE"
+dat[(grepl("PORTUGUESE", dat$ETHNICITY)),]$ETHNICITY <- "WHITE"
+dat[(grepl("BLACK", dat$ETHNICITY)),]$ETHNICITY <- "BLACK"
+dat[(grepl("HISPANIC", dat$ETHNICITY)),]$ETHNICITY <- "HISPANIC"
+dat[(grepl("ASIAN|HISPANIC|MIDDLE|NATIVE|MULTI|DECLINED|UNABLE|OTHER|NOT", dat$ETHNICITY)),]$ETHNICITY <- "UNKNOWN/OTHER"
+
+## Marriage
+dat$MARITAL_STATUS <- ifelse(dat$MARITAL_STATUS == "WIDOWED", "SEPARATED", dat$MARITAL_STATUS)
+dat$MARITAL_STATUS <- ifelse(dat$MARITAL_STATUS == "DIVORCED", "SEPARATED", dat$MARITAL_STATUS)
+dat$MARITAL_STATUS <- ifelse(dat$MARITAL_STATUS == "", "SINGLE/UNK", dat$MARITAL_STATUS)
+dat$MARITAL_STATUS <- ifelse(dat$MARITAL_STATUS == "SINGLE", "SINGLE/UNK", dat$MARITAL_STATUS)
+
+## Change levels for tabulation
+## Admission Location
+dat[(grepl("REFERRAL", dat$ADMIT_LOCATION)),]$ADMIT_LOCATION <- "PHYS/CLINIC REFERRAL"
+dat[(grepl("TRANSFER", dat$ADMIT_LOCATION)),]$ADMIT_LOCATION <- "TRANSFER FROM HOSP/SNF"
+
+## Discharge Location
+## Rehab = SNF
+dat$DISCHARGE_LOCATION <- ifelse(dat$DISCHARGE_LOCATION == "REHAB/DISTINCT PART HOSP", "SNF", dat$DISCHARGE_LOCATION)
+## Aggregate SHORT TERM HOSPITAL and OTHER
+dat$DISCHARGE_LOCATION <- ifelse(dat$DISCHARGE_LOCATION == "SHORT TERM HOSPITAL", "SHORT TERM HOSPITAL/OTHER", dat$DISCHARGE_LOCATION)
+dat$DISCHARGE_LOCATION <- ifelse(dat$DISCHARGE_LOCATION == "OTHER FACILITY", "SHORT TERM HOSPITAL/OTHER", dat$DISCHARGE_LOCATION)
+
+## Hospice
+dat[(grepl("HOSPICE", dat$DISCHARGE_LOCATION)),]$DISCHARGE_LOCATION <- "HOSPICE"
+## DISC ~= HOME HEALTH
+dat[(grepl("DISC", dat$DISCHARGE_LOCATION)),]$DISCHARGE_LOCATION <- "HOME HEALTH CARE"
+## Home = Home/Home Health
+dat[(grepl("HOME", dat$DISCHARGE_LOCATION)),]$DISCHARGE_LOCATION <- "HOME/HOME HEALTH CARE"
+## Left = Home
+dat[(grepl("LEFT", dat$DISCHARGE_LOCATION)),]$DISCHARGE_LOCATION <- "HOME/HOME HEALTH CARE"
+
+## Bucket languages to ENGL/Other
+dat$LANGUAGE <- ifelse(dat$LANGUAGE == "ENGL", dat$LANGUAGE, "OTHER")
+
+## Elixhauser
+dat$ELIXHAUSER_SCORE <- apply(dat[,grepl("ADMISSION_", colnames(dat))], 1, sum)
+```
+
+### Drop Unnecessary Data
+
+```{r}
+dat <- dat[,!(colnames(dat) %in% c("ADMITTIME",
+               "DISCHTIME",
+               "DOD",
+               "DEATHTIME",
+               "EDREGTIME",
+               "EDOUTTIME",
+               "DIAGNOSIS",
+               "HAS_CHARTEVENTS_DATA",
+               "DOB",
+               "DOD_HOSP",
+               "DOD_SSN",
+               "EXPIRE_FLAG",
+               "INTIME",
+               "OUTTIME",
+               "DBSOURCE",
+               "ROW_ID",
+               "LAST_CAREUNIT",
+               "FIRST_WARDID",
+               "LAST_WARDID",
+               "LOS",
+               "INSURANCE",
+               "RELIGION",
+               "VENTNUM",
+               "STARTTIME",
+               "ENDTIME",
+               "CHARTDATE",
+               "CHARTTIME",
+               "STORETIME",
+               "TEXT",
+               "DESCRIPTION",
+               ## Maybe keep category..
+               "CATEGORY",
+               "CGID",
+               "CHILD",
+               "SPOUSE",
+               "ISERROR"))]
+```
+
+## Ventilation Time
+
+Create `PERC_VENT_DUR` = `sum(VENT_DURATION)`/`ICU_LOS`
+
+1. Aggregate `VENT_DURATION_HOURS` by HOSPITAL ADMISSION (same `n` as ICU ADMISSION)
+
+
+```{r}
+## Reload durations data
+vent <- read.csv("~/MIMIC-III/ventdurations.csv", header = T, stringsAsFactors = F)
+colnames(vent) <- toupper(colnames(vent))
+
+## Vent has multiple durations for ICUSTAY's, aggregate them
+vent <- aggregate(DURATION_HOURS ~ ICUSTAY_ID, data = vent, FUN = sum)
+
+## Don't remerge yet
+## dat <- merge(..., vent, by = "ICUSTAY_ID", all.x = T)
+
+los <- dat[,c("ICUSTAY_ID", "LOS_ICU", "LOS_HOSPITAL")]
+
+## Remove duplicates
+los <- los[!duplicated(los$ICUSTAY_ID),]
+
+## Merge
+vent <- merge(los, vent, by = "ICUSTAY_ID")
+
+## Clean
+rm(los)
+
+## Create Duration Days
+vent$DURATION_DAYS <- vent$DURATION_HOURS/24
+## PERC_ICU_VENT
+vent$PERC_ICU_VENT <- vent$DURATION_DAYS/vent$LOS_ICU*100
+
+head(vent)
+
+## Drop unnecessary variables
+vent$LOS_HOSPITAL <- NULL
+vent$LOS_ICU <- NULL
+```
+
+### Aggregate to Admission Level
+
+```{r}
+tmp <- aggregate(cbind(CHILD_FIRST_48,
+                       SPOUSE_FIRST_48,
+                       MORT_1YR,
+                       MORT_3MO,
+                       HOSPITAL_EXPIRE_FLAG,
+                       AGE,
+                       VASOPRESSOR_DURATION_HOURS,
+                       LOS_HOSPITAL,
+                       LOS_ICU,
+                       HOSPSTAY_SEQ,
+                       RRT_D1,
+                       ELIXHAUSER_SCORE,
+                       SOFA_SCORE,
+                       ADMISSION_CONGESTIVE_HEART_FAILURE, 
+                       ADMISSION_CARDIAC_ARRHYTHMIAS,
+                       ADMISSION_VALVULAR_DISEASE,
+                       ADMISSION_PULMONARY_CIRCULATION, 
+                       ADMISSION_PERIPHERAL_VASCULAR, 
+                       ADMISSION_HYPERTENSION, 
+                       ADMISSION_PARALYSIS, 
+                       ADMISSION_OTHER_NEUROLOGICAL, 
+                       ADMISSION_CHRONIC_PULMONARY, 
+                       ADMISSION_DIABETES_UNCOMPLICATED, 
+                       ADMISSION_DIABETES_COMPLICATED, 
+                       ADMISSION_HYPOTHYROIDISM, 
+                       ADMISSION_RENAL_FAILURE, 
+                       ADMISSION_LIVER_DISEASE, 
+                       ADMISSION_PEPTIC_ULCER, 
+                       ADMISSION_AIDS, 
+                       ADMISSION_LYMPHOMA, 
+                       ADMISSION_METASTATIC_CANCER, 
+                       ADMISSION_SOLID_TUMOR, 
+                       ADMISSION_RHEUMATOID_ARTHRITIS, 
+                       ADMISSION_COAGULOPATHY, 
+                       ADMISSION_OBESITY, 
+                       ADMISSION_WEIGHT_LOSS, 
+                       ADMISSION_FLUID_ELECTROLYTE, 
+                       ADMISSION_BLOOD_LOSS_ANEMIA, 
+                       ADMISSION_DEFICIENCY_ANEMIAS, 
+                       ADMISSION_ALCOHOL_ABUSE, 
+                       ADMISSION_DRUG_ABUSE, 
+                       ADMISSION_PSYCHOSES, 
+                       ADMISSION_DEPRESSION) ~
+                       GENDER +
+                   ETHNICITY +
+                   LANGUAGE +
+                   MARITAL_STATUS +
+                   FIRST_CAREUNIT +
+                   FIRST_ICU_STAY +
+                   ADMIT_LOCATION +
+                   DISCHARGE_LOCATION +
+                   SUBJECT_ID + 
+                   HADM_ID +
+                   ICUSTAY_ID, data = dat, FUN = max)
+```
+
+### Merge to ventilation data
+
+```{r}
+temp <- merge(tmp, vent, by = "ICUSTAY_ID")
+```
+
+
+```{r}
+## Write
+write.csv(temp, file = "~/caregivers/data/processed/regression_data11Jun2020.csv", row.names = F)
+```

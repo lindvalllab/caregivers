@@ -1,0 +1,308 @@
+---
+title: "Adjusted and Unadjusted Analyses"
+output: html_document
+---
+
+```{r, echo = F, warning=F, message = F}
+library(sjPlot)
+library(sjstats)
+library(tableone)
+library(rcompanion)
+
+model_info <- function(fit){
+  model_sum <- summary(fit)
+  odds_ratio <- cbind(OR = exp(fit$coef), exp(confint(fit)))
+  my_list <- list(model_sum, odds_ratio)
+  names(my_list) <- c("Model Summary", "OR Summary")
+  return(my_list)
+}
+
+## to_hours
+## convert MIMIC-III date time format to hours
+to_hours <- function(some_time){
+  return(as.numeric(strptime(some_time, "%Y-%m-%d %H:%M:%S", tz = "EST"))/(60*60))
+}
+
+## Factor data which have a few levels
+factor_data <- function(dat){
+    ## Any row with levels less than the log of the number of rows
+    cols_to_factor <- sapply(dat, function(col) length(unique(col)) < log10(length(col) * 1000) )
+    dat[cols_to_factor] <- lapply(dat[cols_to_factor], factor)
+    return(dat)
+}
+
+
+plotDat <- function(dat, column, x_col, bs, mn, xl, yl){
+  tmp <- as.matrix(table(dat[[column]], dat[[x_col]]))
+  prop <- prop.table(tmp, margin = 2)#2 for column-wise proportions
+  par(mar = c(5.0, 4.0, 4.0, 15), xpd = TRUE)
+  barplot(prop, col = c("#808080", "#000000"), beside = bs, width = 2, main = mn, xlab = xl, ylab = yl)
+  legend("topright", inset = c(-0.25,0), fill = c("#808080", "#000000"), legend=rownames(prop))
+}
+
+
+#plotDat(temp, "NQF", "ADMISSION_TYPE", F, "Admission Type", "Admission Type", "Frequency")
+#test <- table(temp$ADMISSION_TYPE, temp$NQF)
+#test
+#chisq.test(test)
+##pairwiseNominalIndependence(
+#  as.matrix(test), 
+#  fisher = T, gtest = F, chisq = F, method = "fdr")
+```
+
+### Load data
+
+```{r}
+dat <- read.csv("~/caregivers/data/processed/regression_data11Jun2020.csv", 
+                header = T, stringsAsFactors = F)
+
+## Drop columns
+dat$DURATION_HOURS <- NULL
+dat$DURATION_DAYS <- NULL
+
+```
+
+## Unadjusted Results
+
+```{r}
+tmp <- dat[,c("SPOUSE_FIRST_48",
+                "CHILD_FIRST_48",
+                "MORT_1YR",
+                "MORT_3MO",
+                "AGE",
+                "GENDER",
+                "LANGUAGE",
+                "ETHNICITY",
+                "MARITAL_STATUS",
+                "SOFA_SCORE",
+                "ELIXHAUSER_SCORE",
+                "PERC_ICU_VENT",
+                "LOS_HOSPITAL",
+                "LOS_ICU")]
+
+## Factor
+tmp <- factor_data(tmp)
+
+## Define non normal variables
+non_normal <- c("AGE", 
+                "PERC_ICU_VENT",
+                "SOFA_SCORE",
+                "ELIXHAUSER_SCORE",
+                "LOS_HOSPITAL",
+                "LOS_ICU")
+
+
+
+overall_tab <- CreateTableOne(data = tmp)
+
+#write.csv(print(overall_tab, non_normal = non_normal, quote = F, noSpaces = T, #showAllLevels = TRUE), file = "~/Desktop/CG_Data/caregivers/overall_table_one12Jun2020.csv")
+
+child_tab <- CreateTableOne(data = tmp, strata = "CHILD_FIRST_48")
+
+#write.csv(print(child_tab, nonnormal = non_normal, 
+#                quote = F, noSpaces = T, showAllLevels = T), file = "~/Desktop/CG_Data/caregivers/child_table_one12Jun2020.csv")
+
+spouse_tab <- CreateTableOne(data = tmp, strata = "SPOUSE_FIRST_48")
+
+#write.csv(print(spouse_tab, nonnormal = non_normal, 
+#                quote = F, noSpaces = T, showAllLevels = T), file = "~/Desktop/CG_Data/caregivers/Spouse_table_one12Jun2020.csv")
+```
+
+
+## Family Involvement and Ventilator Use
+
+### Subset data
+
+__Outcome:__ `PERC_ICU_VENT`
+
+1. Demographics: `AGE`, `GENDER`, `LANGUAGE`, `MARITAL_STATUS`
+2. Clinical: `SOFA`
+3. Communication: `SPOUSE_FIRST_48`, `CHILD_FIRST_48`
+
+```{r}
+## Subset
+temp <- dat[,c("PERC_ICU_VENT",
+                "AGE",
+                "GENDER",
+                "LANGUAGE",
+                "MARITAL_STATUS",
+                "SOFA_SCORE",
+                "ELIXHAUSER_SCORE",
+                "SPOUSE_FIRST_48",
+                "CHILD_FIRST_48")]
+
+
+## Bucket Ages
+dat$AGE_BUCKET <- ifelse(dat$AGE <=  )
+
+## Factor
+temp <- factor_data(temp)
+```
+
+
+### Regression
+
+```{r}
+model <- lm(PERC_ICU_VENT ~., data = temp)
+
+summary(model)
+
+tab_model(model)
+```
+
+## Family Involvement and Length of Stay
+
+#### Note:
+
+```{r}
+hist(dat$LOS_HOSPITAL)
+
+## transform using natural log
+dat$LOG_LOS <- log(dat$LOS_HOSPITAL)
+
+hist(dat$LOG_LOS)
+```
+
+
+```{r}
+## Subset
+temp <- dat[,c("LOS_HOSPITAL",
+                "AGE",
+                "GENDER",
+                "LANGUAGE",
+                "MARITAL_STATUS",
+                "SOFA_SCORE",
+                "SPOUSE_FIRST_48",
+                "CHILD_FIRST_48")]
+
+## Factor
+temp <- factor_data(temp)
+```
+
+### Regression
+
+```{r}
+model <- lm(LOS_HOSPITAL ~., data = temp)
+
+
+tab_model(model)
+
+
+## Recreate model with log transformation
+
+## Subset
+temp <- dat[,c("LOG_LOS",
+                "AGE",
+                "GENDER",
+                "LANGUAGE",
+                "MARITAL_STATUS",
+                "SOFA_SCORE",
+                "SPOUSE_FIRST_48",
+                "CHILD_FIRST_48")]
+
+## Factor
+temp <- factor_data(temp)
+
+
+## Recreate model with log transformation
+model <- lm(LOG_LOS ~., data = temp)
+
+tab_model(model)
+
+
+summary(model)
+
+
+
+round(cbind((exp(model$coefficients)-1)*100), 2)
+
+```
+
+Only the dependent/response variable is log-transformed. 
+
+
+
+Exponentiate the coefficient, subtract one from this number, and multiply by 100. This gives the percent increase (or decrease) in the response for every one-unit increase in the independent variable. Example: the coefficient is 0.198. (exp(0.198) – 1) * 100 = 21.9. For every one-unit increase in the independent variable, our dependent variable increases by about 22%.
+
+
+https://stats.idre.ucla.edu/sas/faq/how-can-i-interpret-log-transformed-variables-in-terms-of-percent-change-in-linear-regression/
+
+ In such models where the dependent variable has been log-transformed and the predictors have not. To interpet the amount of change in the original metric of the outcome, we first exponentiate the coefficient of census to obtain exp(0.00055773)=1.000558. To calculate the percent change, we can subtract one from this number and multiply by 100. Thus, for a one unit increase in the average daily number of patients (census), the average length of stay (length) increases by 0.06 percent.
+
+## Patient-level factors associated with family involvement
+
+### Child
+
+```{r}
+
+## Subset
+temp <- dat[,c("AGE",
+                "GENDER",
+                "ETHNICITY",
+                "LANGUAGE",
+                "MARITAL_STATUS",
+                "SOFA_SCORE",
+                "SPOUSE_FIRST_48",
+                "CHILD_FIRST_48")]
+
+## Center scale
+center_scale <- function(x) {
+    scale(x, scale = FALSE)
+}
+
+temp$AGE <- center_scale(temp$AGE)  
+  
+
+## Factor
+temp <- factor_data(temp)
+
+
+model <- glm(CHILD_FIRST_48 ~ 
+              GENDER +
+              AGE +
+              ETHNICITY +
+              LANGUAGE +
+              MARITAL_STATUS +
+              SOFA_SCORE +
+               SPOUSE_FIRST_48, 
+                   data = temp,
+                   family = binomial(link = "logit"))
+
+tab_model(model)
+
+```
+
+
+
+
+```{r}
+## Subset
+temp <- dat[,c("AGE",
+                "GENDER",
+                "ETHNICITY",
+                "LANGUAGE",
+                "MARITAL_STATUS",
+                "SOFA_SCORE",
+                "SPOUSE_FIRST_48",
+                "CHILD_FIRST_48")]
+
+temp$AGE <- center_scale(temp$AGE)  
+  
+
+## Factor
+temp <- factor_data(temp)
+
+
+model <- glm(SPOUSE_FIRST_48 ~ 
+              GENDER +
+              AGE +
+              ETHNICITY +
+              LANGUAGE +
+              MARITAL_STATUS +
+              SOFA_SCORE +
+               CHILD_FIRST_48, 
+                   data = temp,
+                   family = binomial(link = "logit"))
+
+tab_model(model)
+```

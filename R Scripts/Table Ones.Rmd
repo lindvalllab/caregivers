@@ -122,7 +122,7 @@ dat[(grepl("HOME", dat$DISCHARGE_LOCATION)),]$DISCHARGE_LOCATION <- "HOME/HOME H
 dat[(grepl("LEFT", dat$DISCHARGE_LOCATION)),]$DISCHARGE_LOCATION <- "HOME/HOME HEALTH CARE"
 
 ## Language
-dat$LANGUAGE <- ifelse(dat$LANGUAGE == "ENGL", "ENGLIST", "OTHER")
+dat$LANGUAGE <- ifelse(dat$LANGUAGE == "ENGL", "ENGLISH", "OTHER")
 ```
 
 ## Drop unnecessary variables
@@ -257,10 +257,6 @@ non_normal <- c("AGE",
                 "LOS_HOSPITAL",
                 "LOS_ICU")
 
-```
-
-
-```{r}
 overall_tab <- CreateTableOne(data = tmp)
 
 write.csv(print(overall_tab, non_normal = non_normal, quote = F, noSpaces = T, showAllLevels = TRUE), file = "~/Desktop/CG_Data/caregivers/overall_table_one03Jun2020.csv")
