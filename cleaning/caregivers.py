@@ -44,8 +44,9 @@ def resolve_annotations(df):
     return df
 
 
-def add_annotation_both_col(df):
+def add_annotation_combined_col(df):
     df["ANNOTATION_BOTH"] = df["ANNOTATION_CHILD"] & df["ANNOTATION_SPOUSE"]
+    df["ANNOTATION_EITHER"] = df["ANNOTATION_CHILD"] | df["ANNOTATION_SPOUSE"]
     
     return df
 
@@ -190,7 +191,7 @@ def process_all(df, df_original, *mimic_dfs):
     df = process_annotations(df)
     df = merge_original_data_file(df, df_original)
     df = resolve_annotations(df)
-    df = add_annotation_both_col(df)
+    df = add_annotation_combined_col(df)
     df = merge_mimic_data(df, *mimic_dfs)
     df = handle_datetime_cols(df)
     df = compute_los_hadm(df)
@@ -216,10 +217,7 @@ def load_data(include_noteevents=False):
     # mimic tables
     mimic_csvs = [
         "ADMISSIONS",
-        "PATIENTS",
-        "elixhauser_score_ahrq",
-        "elixhauser_score_quan",
-        "sofa"
+        "PATIENTS"
     ]
     
     if include_noteevents:
