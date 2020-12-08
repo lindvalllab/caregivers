@@ -1,12 +1,12 @@
 import streamlit as st
 import pandas as pd
 from sklearn.metrics import cohen_kappa_score, confusion_matrix
-from cleaning.iaa_utils import reshape_cr_json 
+from cleaning.clinical_regex import get_full_cr_data 
 
 
 # khuyen and sandra
-FILE_K = '../data/interim/2020-09-22-kd-200-annotations.csv'
-FILE_S = '../data/interim/2020-09-28-sz-200-annotations.csv'
+FILE_K = '../data/raw/2020-09-22-kd-200-annotations.csv'
+FILE_S = '../data/raw/2020-09-28-sz-200-annotations.csv'
 
 # annotation column names
 COL_CHILD = 'child'
@@ -70,9 +70,11 @@ def get_annotation_values(df,
                    COL_TEXT: list})\
              .reset_index()
 
+
 def rename_columns(df):
     return df.rename(columns={COL_CR_L1_ANNOTATION: COL_CHILD,
                               COL_CR_L2_ANNOTATION: COL_SPOUSE})
+
 
 def select_common_rows(df,
                        ids=common_ids,
@@ -82,12 +84,12 @@ def select_common_rows(df,
 
 # =========================================== #
 
-df_k = df_k.pipe(reshape_cr_json)\
+df_k = df_k.pipe(get_full_cr_data)\
            .pipe(get_annotation_values)\
            .pipe(rename_columns)\
            .pipe(select_common_rows)
 
-df_s = df_s.pipe(reshape_cr_json)\
+df_s = df_s.pipe(get_full_cr_data)\
            .pipe(get_annotation_values)\
            .pipe(rename_columns)\
            .pipe(select_common_rows)

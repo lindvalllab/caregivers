@@ -19,6 +19,17 @@ def join_id_with_annotations(df):
     return df
 
 
+def get_full_cr_data(df):
+    df = pd.concat([
+        df,
+        reshape_cr_json(df)
+    ], axis="columns")
+    
+    df.drop(columns=["annotationValues"])
+    
+    return df
+
+
 def has_only_one_annotation_value_per_id(df):
     df = join_id_with_annotations(df)
     df = df.groupby("id", as_index=False)\
