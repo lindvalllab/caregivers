@@ -5,6 +5,11 @@
 *.pyc
 *.egg-info
 
+data/
+!data/raw/Dr.Cooper Analysis .xlsx
+
+models/
+
 venv/
 .ipynb_checkpoints/
 .pytest_cache/
