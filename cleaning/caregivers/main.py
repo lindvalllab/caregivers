@@ -15,57 +15,6 @@ from cleaning.caregivers import (
 )
 
 
-def get_hadm_vent_data(df):
-    vent_cols = [
-        "HADM_ID",
-        "ICUSTAY_ID",
-        "INTIME",
-        "STARTTIME",
-        "ENDTIME",
-        "VENTNUM",
-        "DURATION_HOURS",
-        "HOURS_TO_VENT_HADM",
-        "HOURS_TO_VENT_ICUSTAY",
-        "HAS_VENT_FIRST_48_HADM",
-        "HAS_VENT_FIRST_48_ICUSTAY"
-    ]
-    
-    df = df[vent_cols].drop_duplicates()
-
-    group_hadm = df.groupby("HADM_ID")
-    group_icu = df.groupby(["HADM_ID", "ICUSTAY_ID"])
-    
-    # get data for first ICUSTAY of each HADM
-    vent_first_icu = df.loc[group_hadm["INTIME"].idxmin()]\
-                       .reset_index(drop=True)
-
-    vent_first_icu = vent_first_icu[[
-        "HADM_ID",
-        "HOURS_TO_VENT_ICUSTAY",
-        "HAS_VENT_FIRST_48_ICUSTAY"
-    ]]
-    
-    # total hours spent on vent by HADM_ID
-    vent_total_hours = group_hadm["DURATION_HOURS"].sum()\
-                            .rename("VENT_TOTAL_HOURS")\
-                            .reset_index()
-    
-    # total vent events per ICUSTAY_ID
-    vent_count = group_icu["VENTNUM"].nunique()\
-                    .rename("VENT_COUNT")\
-                    .reset_index()
-    
-    # total vent events per HADM_ID
-    vent_total_count = vent_count.groupby("HADM_ID")["VENT_COUNT"].sum()\
-                        .rename("VENT_TOTAL_COUNT")\
-                        .reset_index()
-        
-    df = vent_first_icu.merge(vent_total_hours)\
-                       .merge(vent_total_count)
-    
-    return df
-
-
 def process_all():
     df = annotations.load_data()
     df = df.merge(mimic.load_data())
@@ -88,6 +37,7 @@ def process_all():
 def load_data_full():
     """Get full, unaggregated data."""
     return process_all()
+
 
 def load_data():
     """Get hospital admission level data."""

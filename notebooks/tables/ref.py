@@ -26,8 +26,6 @@ nonnormal = [
     "SOFA",
     "VENT_TOTAL_HOURS",
     "VENT_TOTAL_COUNT",
-    "VENT_FIRST_48_HADM",
-    "VENT_FIRST_48_ICU",
     "VENT_TIME_FROM_HADM",
     "VENT_TIME_FROM_ICU"
 ]

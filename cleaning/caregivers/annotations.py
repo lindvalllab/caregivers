@@ -58,7 +58,6 @@ def resolve_annotations(df):
 
 
 def add_computed_columns(df):
-    """"""
     df["ANNOTATION_BOTH"] = df["ANNOTATION_CHILD"] & df["ANNOTATION_SPOUSE"]
     df["ANNOTATION_ANY"] = df["ANNOTATION_CHILD"] | df["ANNOTATION_SPOUSE"]
     
