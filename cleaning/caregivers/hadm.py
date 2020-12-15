@@ -55,3 +55,11 @@ def vent_first_48_first_icu(df: pd.DataFrame) -> pd.DataFrame:
     df = df.loc[earliest, ["HADM_ID", "VENT_FIRST_48_ICU"]]
     
     return df
+
+
+def post_icu_mortality(df: pd.DataFrame) -> pd.DataFrame:
+    latest = df.groupby("HADM_ID")["OUTTIME"].idxmax()
+    
+    df = df.loc[latest, ["HADM_ID", "MORTALITY_6MO_FROM_ICU_OUT"]]
+    
+    return df

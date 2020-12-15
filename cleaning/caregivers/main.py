@@ -60,8 +60,8 @@ def load_data():
         IDENTIFIED_CONV_GOC=("CAR", "any"),
         IDENTIFIED_CONV_LIM=("LIM", "any"),
         HOSPITAL_EXPIRE_FLAG=("HOSPITAL_EXPIRE_FLAG", squish),
-        MORTALITY_3MO=("MORTALITY_3MO", squish),
-        MORTALITY_1Y=("MORTALITY_1Y", squish),
+        MORTALITY_3MO_FROM_HADM_ADMIT=("MORTALITY_3MO_FROM_HADM_ADMIT", squish),
+        MORTALITY_1Y_FROM_HADM_ADMIT=("MORTALITY_1Y_FROM_HADM_ADMIT", squish),
         VENT_TIME_FROM_HADM=("VENT_TIME_FROM_HADM", "min"),
         VENT_FIRST_48_HADM=("VENT_FIRST_48_HADM", "any")
     ).reset_index()
@@ -75,5 +75,8 @@ def load_data():
     df_h = df_h.merge(hadm.vent_total_count(df))
     df_h = df_h.merge(hadm.vent_time_from_first_icu(df))
     df_h = df_h.merge(hadm.vent_first_48_first_icu(df))
+    
+    # Post ICU mortality
+    df_h = df_h.merge(hadm.post_icu_mortality(df))
             
     return df_h

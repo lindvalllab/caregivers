@@ -13,14 +13,17 @@ def admission_age(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def time_to_death(df: pd.DataFrame) -> pd.DataFrame:
-    df["DAYS_TO_DEATH"] = df["DOD"].subtract(df["ADMITTIME"]) / np.timedelta64(1, "D")
-    
+    df["DAYS_TO_DEATH_HADM"] = df["DOD"].subtract(df["ADMITTIME"]) / np.timedelta64(1, "D")
+    df["DAYS_TO_DEATH_ICU"] = df["DOD"].subtract(df["OUTTIME"]) / np.timedelta64(1, "D")
+        
     # exclude rows with missing DOD info (so mortality values are NA rather than False)
-    days_to_death = df[df["DAYS_TO_DEATH"].notna()]["DAYS_TO_DEATH"]
+    days_to_death_hadm = df[df["DAYS_TO_DEATH_HADM"].notna()]["DAYS_TO_DEATH_HADM"]
+    days_to_death_icu = df[df["DAYS_TO_DEATH_ICU"].notna()]["DAYS_TO_DEATH_ICU"]    
     
-    df["MORTALITY_3MO"] = days_to_death < 90
-    df["MORTALITY_1Y"] = days_to_death < 365
-    
+    df["MORTALITY_3MO_FROM_HADM_ADMIT"] = days_to_death_hadm < 90
+    df["MORTALITY_1Y_FROM_HADM_ADMIT"] = days_to_death_hadm < 365
+    df["MORTALITY_6MO_FROM_ICU_OUT"] = days_to_death_icu < 180
+
     return df
 
 
