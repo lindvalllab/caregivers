@@ -40,11 +40,13 @@ def time_to_vent(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def elixhauser_weighted_scores(df: pd.DataFrame) -> pd.DataFrame:
+def elixhauser_scores(df: pd.DataFrame) -> pd.DataFrame:
     vw = elixhauser_weights.vw
     ahrq = elixhauser_weights.ahrq
     
-    df["ELIX_VW"] = (df[vw.keys()]*vw).sum(1)
-    df["ELIX_AHRQ"] = (df[ahrq.keys()]*ahrq).sum(1)
+    # vw should be the same as ahrq
+    df["ELIX_UNWEIGHTED"] = df[vw.keys()].sum(1)
+    df["ELIX_WEIGHTED_VW"] = (df[vw.keys()]*vw).sum(1)
+    df["ELIX_WEIGHTED_AHRQ"] = (df[ahrq.keys()]*ahrq).sum(1)
     
     return df

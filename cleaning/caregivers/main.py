@@ -24,7 +24,7 @@ def process_all():
     df = compute.time_to_death(df)
     df = compute.los_hadm(df)
     df = compute.admission_age(df)
-    df = compute.elixhauser_weighted_scores(df)
+    df = compute.elixhauser_scores(df)
     df = impute.admission_age(df)
     df = collapse.hospital_expire_flag_to_bool(df)
     df = collapse.ethnicity(df)
@@ -98,8 +98,9 @@ def load_data():
         DRUG_ABUSE=("DRUG_ABUSE", squish),
         PSYCHOSES=("PSYCHOSES", squish),
         DEPRESSION=("DEPRESSION", squish),
-        ELIX_VW=("ELIX_VW", squish),
-        ELIX_AHRQ=("ELIX_AHRQ", squish)
+        ELIX_SCORE=("ELIX_UNWEIGHTED", squish),
+        ELIX_WEIGHTED_VW=("ELIX_WEIGHTED_VW", squish),
+        ELIX_WEIGHTED_AHRQ=("ELIX_WEIGHTED_AHRQ", squish)
     ).reset_index()
     
     

@@ -13,8 +13,9 @@ columns=[
     "IDENTIFIED_CONV_GOC",
     "IDENTIFIED_CONV_LIM",
     "SOFA",
-    "ELIX_VW",
-    "ELIX_AHRQ",
+    "ELIX_SCORE",
+    "ELIX_WEIGHTED_AHRQ",
+    "ELIX_WEIGHTED_VW",
     "VENT_TOTAL_HOURS",
     "VENT_TOTAL_COUNT",
     "VENT_FIRST_48_HADM",
@@ -24,6 +25,9 @@ columns=[
 ]
 
 columns_elixhauser = [
+    "ELIX_SCORE",
+    "ELIX_WEIGHTED_VW",
+    "ELIX_WEIGHTED_AHRQ",
     "CONGESTIVE_HEART_FAILURE",
     "CARDIAC_ARRHYTHMIAS",
     "VALVULAR_DISEASE",
@@ -53,9 +57,7 @@ columns_elixhauser = [
     "ALCOHOL_ABUSE",
     "DRUG_ABUSE",
     "PSYCHOSES",
-    "DEPRESSION",
-    "ELIX_VW",
-    "ELIX_AHRQ"
+    "DEPRESSION"
 ]
 
 nonnormal = [
@@ -66,6 +68,7 @@ nonnormal = [
     "VENT_TOTAL_COUNT",
     "VENT_TIME_FROM_HADM",
     "VENT_TIME_FROM_ICU",
-    "ELIX_AHRQ",
-    "ELIX_VW"
+    "ELIX_SCORE",
+    "ELIX_WEIGHTED_AHRQ",
+    "ELIX_WEIGHTED_VW"
 ]
