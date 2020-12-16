@@ -58,8 +58,20 @@ def resolve_annotations(df):
 
 
 def add_computed_columns(df):
-    df["ANNOTATION_BOTH"] = df["ANNOTATION_CHILD"] & df["ANNOTATION_SPOUSE"]
-    df["ANNOTATION_ANY"] = df["ANNOTATION_CHILD"] | df["ANNOTATION_SPOUSE"]
+    only_child = df["ANNOTATION_CHILD"] & ~df["ANNOTATION_SPOUSE"]
+    only_spouse = ~df["ANNOTATION_CHILD"] & df["ANNOTATION_SPOUSE"]
+    neither = ~df["ANNOTATION_CHILD"] & ~df["ANNOTATION_SPOUSE"]
+    both = df["ANNOTATION_CHILD"] & df["ANNOTATION_SPOUSE"]
+    any_ = df["ANNOTATION_CHILD"] | df["ANNOTATION_SPOUSE"]
+    
+    df["ANNOTATION_BOTH"] = both
+    df["ANNOTATION_ANY"] = any_
+    
+    # all ANNOTATION_ columns in one category
+    df.loc[only_child, "ANNOTATION"] = "CHILD"
+    df.loc[only_spouse, "ANNOTATION"] = "SPOUSE"
+    df.loc[both, "ANNOTATION"] = "BOTH"
+    df.loc[neither, "ANNOTATION"] = "NEITHER"
     
     return df
 

@@ -53,14 +53,24 @@ def load_sofa_table():
     df.columns = df.columns.str.upper()
     
     return df
+
+
+def load_elixhauser_table():
+    df = pd.read_csv(path_to_mimic_derived("elixhauser"))
     
+    df.columns = df.columns.str.upper()
+    
+    return df
+
 
 def load_data():
     df_main = load_main_tables()
     df_vent = load_ventduration_table()
     df_sofa = load_sofa_table()
+    df_elix = load_elixhauser_table()
     
-    df = df_main.merge(df_vent)\
-                .merge(df_sofa)
+    df = df_main.merge(df_vent, how="left")\
+                .merge(df_sofa, how="left")\
+                .merge(df_elix, how="left")
     
     return df

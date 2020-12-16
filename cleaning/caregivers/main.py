@@ -24,6 +24,7 @@ def process_all():
     df = compute.time_to_death(df)
     df = compute.los_hadm(df)
     df = compute.admission_age(df)
+    df = compute.elixhauser_weighted_scores(df)
     df = impute.admission_age(df)
     df = collapse.hospital_expire_flag_to_bool(df)
     df = collapse.ethnicity(df)
@@ -57,13 +58,48 @@ def load_data():
         ANNOTATION_SPOUSE=("ANNOTATION_SPOUSE", squish),
         ANNOTATION_BOTH=("ANNOTATION_BOTH", squish),
         ANNOTATION_ANY=("ANNOTATION_ANY", squish),
+        ANNOTATION=("ANNOTATION", squish),
         IDENTIFIED_CONV_GOC=("CAR", "any"),
         IDENTIFIED_CONV_LIM=("LIM", "any"),
         HOSPITAL_EXPIRE_FLAG=("HOSPITAL_EXPIRE_FLAG", squish),
         MORTALITY_3MO_FROM_HADM_ADMIT=("MORTALITY_3MO_FROM_HADM_ADMIT", squish),
         MORTALITY_1Y_FROM_HADM_ADMIT=("MORTALITY_1Y_FROM_HADM_ADMIT", squish),
         VENT_TIME_FROM_HADM=("VENT_TIME_FROM_HADM", "min"),
-        VENT_FIRST_48_HADM=("VENT_FIRST_48_HADM", "any")
+        VENT_FIRST_48_HADM=("VENT_FIRST_48_HADM", "any"),
+        
+        # elixhauser
+        CONGESTIVE_HEART_FAILURE=("CONGESTIVE_HEART_FAILURE", squish),
+        CARDIAC_ARRHYTHMIAS=("CARDIAC_ARRHYTHMIAS", squish),
+        VALVULAR_DISEASE=("VALVULAR_DISEASE", squish),
+        PULMONARY_CIRCULATION=("PULMONARY_CIRCULATION", squish),
+        PERIPHERAL_VASCULAR=("PERIPHERAL_VASCULAR", squish),
+        HYPERTENSION=("HYPERTENSION", squish),
+        PARALYSIS=("PARALYSIS", squish),
+        OTHER_NEUROLOGICAL=("OTHER_NEUROLOGICAL", squish),
+        CHRONIC_PULMONARY=("CHRONIC_PULMONARY", squish),
+        DIABETES_UNCOMPLICATED=("DIABETES_UNCOMPLICATED", squish),
+        DIABETES_COMPLICATED=("DIABETES_COMPLICATED", squish),
+        HYPOTHYROIDISM=("HYPOTHYROIDISM", squish),
+        RENAL_FAILURE=("RENAL_FAILURE", squish),
+        LIVER_DISEASE=("LIVER_DISEASE", squish),
+        PEPTIC_ULCER=("PEPTIC_ULCER", squish),
+        AIDS=("AIDS", squish),
+        LYMPHOMA=("LYMPHOMA", squish),
+        METASTATIC_CANCER=("METASTATIC_CANCER", squish),
+        SOLID_TUMOR=("SOLID_TUMOR", squish),
+        RHEUMATOID_ARTHRITIS=("RHEUMATOID_ARTHRITIS", squish),
+        COAGULOPATHY=("COAGULOPATHY", squish),
+        OBESITY=("OBESITY", squish),
+        WEIGHT_LOSS=("WEIGHT_LOSS", squish),
+        FLUID_ELECTROLYTE=("FLUID_ELECTROLYTE", squish),
+        BLOOD_LOSS_ANEMIA=("BLOOD_LOSS_ANEMIA", squish),
+        DEFICIENCY_ANEMIAS=("DEFICIENCY_ANEMIAS", squish),
+        ALCOHOL_ABUSE=("ALCOHOL_ABUSE", squish),
+        DRUG_ABUSE=("DRUG_ABUSE", squish),
+        PSYCHOSES=("PSYCHOSES", squish),
+        DEPRESSION=("DEPRESSION", squish),
+        ELIX_VW=("ELIX_VW", squish),
+        ELIX_AHRQ=("ELIX_AHRQ", squish)
     ).reset_index()
     
     
