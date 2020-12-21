@@ -4,10 +4,10 @@ import pandas as pd
 def ethnicity(df):
     df["ETHNICITY"] = df["ETHNICITY"].replace({
         "^ASIAN.*": "ASIAN",
-        "^BLACK.*": "BLACK/AFRICAN AMERICAN",
+        "^BLACK.*": "BLACK",
         "^HISPANIC.*": "HISPANIC/LATINO",
         "^WHITE.*": "WHITE",
-        "AMERICAN INDIAN/ALASKA NATIVE FEDERALLY RECOGNIZED TRIBE": "AMERICAN INDIAN/ALASKA NATIVE",
+        "AMERICAN INDIAN/ALASKA NATIVE FEDERALLY RECOGNIZED TRIBE": "OTHER",
         "PORTUGUESE": "OTHER",
         "MIDDLE EASTERN": "OTHER",
         "MULTI RACE ETHNICITY": "OTHER", 

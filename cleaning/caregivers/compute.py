@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from cleaning import elixhauser_weights
+from cleaning.caregivers import mimic
 
 
 def los_hadm(df: pd.DataFrame) -> pd.DataFrame:
@@ -50,3 +51,29 @@ def elixhauser_scores(df: pd.DataFrame) -> pd.DataFrame:
     df["ELIX_WEIGHTED_AHRQ"] = (df[ahrq.keys()]*ahrq).sum(1)
     
     return df
+
+
+def readmission(df: pd.DataFrame) -> pd.DataFrame:
+    # reload mimic data (more readable than efficient)
+    df_m = mimic.load_data()
+    df_m = df_m[["SUBJECT_ID", "HADM_ID", "ADMITTIME"]].drop_duplicates()
+    
+    # check each ADMITTIME only has one HADM_ID associated with it
+    # for a given subject
+    assert (df_m.groupby(["ADMITTIME", "SUBJECT_ID"])["HADM_ID"].nunique() == 1).all()
+    
+    # find the admittimes of the last hospital admit for each patient
+    df_subj = df_m.groupby("SUBJECT_ID")\
+                  .agg(ADMITTIME_LATEST=("ADMITTIME", "max"))\
+                  .reset_index()
+    
+    df_m = df_m.merge(df_subj)
+    
+    df_m["HAS_READMISSION"] = df_m["ADMITTIME"] < df_m["ADMITTIME_LATEST"]
+    
+    df_m = df_m[["SUBJECT_ID", "HADM_ID", "HAS_READMISSION"]].drop_duplicates()
+    
+    df = df.merge(df_m)
+    
+    return df
+    

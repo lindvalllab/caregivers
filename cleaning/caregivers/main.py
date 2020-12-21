@@ -25,6 +25,7 @@ def process_all():
     df = compute.los_hadm(df)
     df = compute.admission_age(df)
     df = compute.elixhauser_scores(df)
+    df = compute.readmission(df)
     df = impute.admission_age(df)
     df = collapse.hospital_expire_flag_to_bool(df)
     df = collapse.ethnicity(df)
@@ -64,6 +65,7 @@ def load_data():
         HOSPITAL_EXPIRE_FLAG=("HOSPITAL_EXPIRE_FLAG", squish),
         MORTALITY_3MO_FROM_HADM_ADMIT=("MORTALITY_3MO_FROM_HADM_ADMIT", squish),
         MORTALITY_1Y_FROM_HADM_ADMIT=("MORTALITY_1Y_FROM_HADM_ADMIT", squish),
+        HAS_READMISSION=("HAS_READMISSION", squish),
         VENT_TIME_FROM_HADM=("VENT_TIME_FROM_HADM", "min"),
         VENT_FIRST_48_HADM=("VENT_FIRST_48_HADM", "any"),
         
