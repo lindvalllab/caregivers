@@ -13123,6 +13123,23 @@ div#notebook {
 <p><code>BOTH</code> if both child and spouse documentation were found</p>
 <p><code>NEITHER</code> if neither child nor spouse documentation were found</p>
 </blockquote>
+<h4 id="Notes">Notes<a class="anchor-link" href="#Notes">&#182;</a></h4><ul>
+<li>This is just an alternative formulation of the other <code>ANNOTATION_</code> variables.</li>
+<li><p>Note that</p>
+<blockquote><p><code>ANNOTATION = CHILD</code></p>
+</blockquote>
+<p>is different from</p>
+<blockquote><p><code>ANNOTATION_CHILD = True</code></p>
+</blockquote>
+<p>The first is</p>
+<blockquote><p>has <code>CHILD</code> only</p>
+</blockquote>
+<p>but the second is</p>
+<blockquote><p>has <code>CHILD</code> (but may also have <code>SPOUSE</code>)</p>
+</blockquote>
+<p>(Same idea goes for <code>SPOUSE</code>.)</p>
+</li>
+</ul>
 
 </div>
 </div>
@@ -13132,6 +13149,9 @@ div#notebook {
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="ANNOTATION_[DOMAIN]"><code>ANNOTATION_[DOMAIN]</code><a class="anchor-link" href="#ANNOTATION_[DOMAIN]">&#182;</a></h3><h4 id="Definition">Definition<a class="anchor-link" href="#Definition">&#182;</a></h4><blockquote><p><code>True</code> if any documentation of <code>[DOMAIN]</code> was found in the notes for the given hospital admission. <code>False</code> otherwise.</p>
 </blockquote>
+<h4 id="Variables">Variables<a class="anchor-link" href="#Variables">&#182;</a></h4>
+<pre><code>ANNOTATION_CHILD
+ANNOTATION_SPOUSE</code></pre>
 <h4 id="Notes">Notes<a class="anchor-link" href="#Notes">&#182;</a></h4><ul>
 <li>Annotations were resolved using the following key:<blockquote><p>1 = "true positive" $\to$ <code>True</code></p>
 <p>9 = "false positive" $\to$ <code>False</code></p>
@@ -13277,7 +13297,7 @@ ELIX_WEIGHTED_VW</code></pre>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="HAS_READMISSION"><code>HAS_READMISSION</code><a class="anchor-link" href="#HAS_READMISSION">&#182;</a></h3><h4 id="Definition">Definition<a class="anchor-link" href="#Definition">&#182;</a></h4><blockquote><p>True if the patient had another hospital admission after the given one.</p>
+<h3 id="HAS_READMISSION"><code>HAS_READMISSION</code><a class="anchor-link" href="#HAS_READMISSION">&#182;</a></h3><h4 id="Definition">Definition<a class="anchor-link" href="#Definition">&#182;</a></h4><blockquote><p><code>True</code> if the patient had another hospital admission after the given one. <code>False</code> otherwise.</p>
 </blockquote>
 <h4 id="MIMIC-References">MIMIC References<a class="anchor-link" href="#MIMIC-References">&#182;</a></h4><ul>
 <li><a href="https://mimic.physionet.org/mimictables/admissions/#admittime-dischtime-deathtime"><code>ADMITTIME</code></a></li>
@@ -13382,7 +13402,7 @@ IDENTIFIED_CONV_LIM (Code Status Limitations)</code></pre>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="MORTALITY_[DURATION]_FROM_[REFERENCE]"><code>MORTALITY_[DURATION]_FROM_[REFERENCE]</code><a class="anchor-link" href="#MORTALITY_[DURATION]_FROM_[REFERENCE]">&#182;</a></h3><h4 id="Definition">Definition<a class="anchor-link" href="#Definition">&#182;</a></h4><blockquote><p><code>True</code> if the patient passed away within <code>[DURATION]</code> from a given <code>[REFERENCE]</code> time (e.g. hospital admission).</p>
+<h3 id="MORTALITY_[DURATION]_FROM_[REFERENCE]"><code>MORTALITY_[DURATION]_FROM_[REFERENCE]</code><a class="anchor-link" href="#MORTALITY_[DURATION]_FROM_[REFERENCE]">&#182;</a></h3><h4 id="Definition">Definition<a class="anchor-link" href="#Definition">&#182;</a></h4><blockquote><p><code>True</code> if the patient passed away within <code>[DURATION]</code> from a given <code>[REFERENCE]</code> time (e.g. hospital admission). <code>False</code> otherwise.</p>
 </blockquote>
 <h4 id="Variables">Variables<a class="anchor-link" href="#Variables">&#182;</a></h4>
 <pre><code>MORTALITY_3MO_FROM_HADM_ADMIT
@@ -13429,7 +13449,7 @@ MORTALITY_1Y_FROM_HADM_ADMIT</code></pre>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="VENT_FIRST_48_[REFERENCE]"><code>VENT_FIRST_48_[REFERENCE]</code><a class="anchor-link" href="#VENT_FIRST_48_[REFERENCE]">&#182;</a></h3><h4 id="Definition">Definition<a class="anchor-link" href="#Definition">&#182;</a></h4><blockquote><p><code>True</code> if there was a ventilation event during the first 48 hours from the given <code>[REFERENCE]</code> point during the given hospital admission.</p>
+<h3 id="VENT_FIRST_48_[REFERENCE]"><code>VENT_FIRST_48_[REFERENCE]</code><a class="anchor-link" href="#VENT_FIRST_48_[REFERENCE]">&#182;</a></h3><h4 id="Definition">Definition<a class="anchor-link" href="#Definition">&#182;</a></h4><blockquote><p><code>True</code> if there was a ventilation event during the first 48 hours from the given <code>[REFERENCE]</code> point during the given hospital admission. <code>False</code> otherwise.</p>
 </blockquote>
 <h4 id="Variables">Variables<a class="anchor-link" href="#Variables">&#182;</a></h4>
 <pre><code>VENT_FIRST_48_HADM
@@ -13458,7 +13478,7 @@ VENT_FIRST_48_ICU</code></pre>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="VENT_TIME_FROM_[REFERENCE]"><code>VENT_TIME_FROM_[REFERENCE]</code><a class="anchor-link" href="#VENT_TIME_FROM_[REFERENCE]">&#182;</a></h3><h4 id="Definition">Definition<a class="anchor-link" href="#Definition">&#182;</a></h4><blockquote><p>Time from a given <code>[REFERENCE]</code> point to the first ventilation event during the hospital admission.</p>
+<h3 id="VENT_TIME_FROM_[REFERENCE]"><code>VENT_TIME_FROM_[REFERENCE]</code><a class="anchor-link" href="#VENT_TIME_FROM_[REFERENCE]">&#182;</a></h3><h4 id="Definition">Definition<a class="anchor-link" href="#Definition">&#182;</a></h4><blockquote><p>Time from a given <code>[REFERENCE]</code> point to the first ventilation event during the hospital admission, in hours.</p>
 </blockquote>
 <h4 id="Variables">Variables<a class="anchor-link" href="#Variables">&#182;</a></h4>
 <pre><code>VENT_TIME_FROM_HADM
