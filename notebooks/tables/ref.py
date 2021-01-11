@@ -2,7 +2,6 @@ columns=[
     "SEX",
     "MARITAL_STATUS",
     "ETHNICITY",
-    "LANGUAGE",
     "ADMISSION_AGE",
     "LOS_HADM",
     "DISCHARGE_LOCATION",
@@ -14,15 +13,7 @@ columns=[
     "IDENTIFIED_CONV_GOC",
     "IDENTIFIED_CONV_LIM",
     "SOFA",
-    "ELIX_SCORE",
-    "ELIX_WEIGHTED_AHRQ",
-    "ELIX_WEIGHTED_VW",
-    "VENT_TOTAL_HOURS",
-    "VENT_TOTAL_COUNT",
-    "VENT_FIRST_48_HADM",
-    "VENT_FIRST_48_ICU",
-    "VENT_TIME_FROM_HADM",
-    "VENT_TIME_FROM_ICU"
+    "ELIX_SCORE"
 ]
 
 columns_elixhauser = [
@@ -59,6 +50,15 @@ columns_elixhauser = [
     "DRUG_ABUSE",
     "PSYCHOSES",
     "DEPRESSION"
+]
+
+columns_vent = [
+    "VENT_TOTAL_HOURS",
+    "VENT_TOTAL_COUNT",
+    "VENT_FIRST_48_HADM",
+    "VENT_FIRST_48_ICU",
+    "VENT_TIME_FROM_HADM",
+    "VENT_TIME_FROM_ICU"
 ]
 
 nonnormal = [

@@ -3,10 +3,10 @@ import pandas as pd
 
 def ethnicity(df):
     df["ETHNICITY"] = df["ETHNICITY"].replace({
-        "^ASIAN.*": "ASIAN",
-        "^BLACK.*": "BLACK",
-        "^HISPANIC.*": "HISPANIC/LATINO",
-        "^WHITE.*": "WHITE",
+        "^ASIAN.*": "OTHER",
+        "^BLACK.*": "OTHER",
+        "^HISPANIC.*": "OTHER",
+        "^WHITE.*": "(NON-HISPANIC) WHITE",
         "AMERICAN INDIAN/ALASKA NATIVE FEDERALLY RECOGNIZED TRIBE": "OTHER",
         "PORTUGUESE": "OTHER",
         "MIDDLE EASTERN": "OTHER",
@@ -35,9 +35,11 @@ def discharge_location(df):
 
 def marital_status(df):
     df["MARITAL_STATUS"] = df["MARITAL_STATUS"].replace({
-        "DIVORCED": "DIVORCED/SEPARATED",
-        "SEPARATED": "DIVORCED/SEPARATED"
-    })
+        "SINGLE": "NOT MARRIED",
+        "WIDOWED": "NOT MARRIED",
+        "DIVORCED": "NOT MARRIED",
+        "SEPARATED": "NOT MARRIED"
+    }, regex=True)
     
     return df
 
