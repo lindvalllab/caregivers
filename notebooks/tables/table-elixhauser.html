@@ -13029,8 +13029,6 @@ body {
 div#notebook {
   overflow: visible;
   border-top: none;
-}div#notebook-container{
-  padding: 6ex 12ex 8ex 12ex;
 }@media print {
   div.cell {
     display: block;
@@ -13076,21 +13074,62 @@ div#notebook {
   <div tabindex="-1" id="notebook" class="border-box-sizing">
     <div class="container" id="notebook-container">
 
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Elixhauser-Data">Elixhauser Data<a class="anchor-link" href="#Elixhauser-Data">&#182;</a></h2>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">display</span>
+<span class="kn">from</span> <span class="nn">tableone</span> <span class="kn">import</span> <span class="n">TableOne</span>
+
+<span class="kn">from</span> <span class="nn">cleaning.caregivers.main</span> <span class="kn">import</span> <span class="n">load_data</span>
+<span class="kn">from</span> <span class="nn">notebooks.tables.ref</span> <span class="kn">import</span> <span class="n">columns_elixhauser</span><span class="p">,</span> <span class="n">nonnormal</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">()</span>
+
+<span class="n">table</span> <span class="o">=</span> <span class="n">TableOne</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">,</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">columns_elixhauser</span><span class="p">,</span>
+    <span class="n">groupby</span> <span class="o">=</span> <span class="s2">&quot;ANNOTATION&quot;</span><span class="p">,</span>
+    <span class="n">nonnormal</span> <span class="o">=</span> <span class="n">nonnormal</span><span class="p">,</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
 
 </div>
 <div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">option_context</span><span class="p">(</span><span class="s2">&quot;display.max_rows&quot;</span><span class="p">,</span> <span class="mi">1000</span><span class="p">):</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
 
 <div class="output_wrapper">
 <div class="output">
 
+
 <div class="output_area">
+
+    <div class="prompt"></div>
+
 
 
 <div class="output_html rendered_html output_subarea ">
@@ -13113,7 +13152,7 @@ div#notebook {
     <tr>
       <th></th>
       <th></th>
-      <th colspan="6" halign="left">Grouped by ANNOTATION</th>
+      <th colspan="7" halign="left">Grouped by ANNOTATION</th>
     </tr>
     <tr>
       <th></th>
@@ -13124,6 +13163,7 @@ div#notebook {
       <th>CHILD</th>
       <th>NEITHER</th>
       <th>SPOUSE</th>
+      <th>P-Value</th>
     </tr>
   </thead>
   <tbody>
@@ -13136,6 +13176,7 @@ div#notebook {
       <td>352</td>
       <td>531</td>
       <td>304</td>
+      <td></td>
     </tr>
     <tr>
       <th>ELIX_SCORE, median [Q1,Q3]</th>
@@ -13146,6 +13187,7 @@ div#notebook {
       <td>5.0 [3.0,6.0]</td>
       <td>4.0 [3.0,6.0]</td>
       <td>4.0 [3.0,6.0]</td>
+      <td>0.002</td>
     </tr>
     <tr>
       <th>ELIX_WEIGHTED_VW, median [Q1,Q3]</th>
@@ -13156,6 +13198,7 @@ div#notebook {
       <td>14.5 [8.0,21.0]</td>
       <td>13.0 [6.0,19.0]</td>
       <td>14.0 [6.0,20.0]</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>ELIX_WEIGHTED_AHRQ, median [Q1,Q3]</th>
@@ -13166,6 +13209,7 @@ div#notebook {
       <td>16.0 [9.0,25.0]</td>
       <td>14.0 [5.5,23.0]</td>
       <td>15.0 [7.0,24.0]</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">CONGESTIVE_HEART_FAILURE, n (%)</th>
@@ -13176,6 +13220,7 @@ div#notebook {
       <td>203 (57.7)</td>
       <td>370 (69.7)</td>
       <td>220 (72.6)</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13185,6 +13230,7 @@ div#notebook {
       <td>149 (42.3)</td>
       <td>161 (30.3)</td>
       <td>83 (27.4)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">CARDIAC_ARRHYTHMIAS, n (%)</th>
@@ -13195,6 +13241,7 @@ div#notebook {
       <td>202 (57.4)</td>
       <td>351 (66.1)</td>
       <td>204 (67.3)</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13204,6 +13251,7 @@ div#notebook {
       <td>150 (42.6)</td>
       <td>180 (33.9)</td>
       <td>99 (32.7)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">VALVULAR_DISEASE, n (%)</th>
@@ -13214,6 +13262,7 @@ div#notebook {
       <td>316 (89.8)</td>
       <td>497 (93.6)</td>
       <td>275 (90.8)</td>
+      <td>0.032</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13223,6 +13272,7 @@ div#notebook {
       <td>36 (10.2)</td>
       <td>34 (6.4)</td>
       <td>28 (9.2)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">PULMONARY_CIRCULATION, n (%)</th>
@@ -13233,6 +13283,7 @@ div#notebook {
       <td>313 (88.9)</td>
       <td>475 (89.5)</td>
       <td>268 (88.4)</td>
+      <td>0.938</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13242,6 +13293,7 @@ div#notebook {
       <td>39 (11.1)</td>
       <td>56 (10.5)</td>
       <td>35 (11.6)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">PERIPHERAL_VASCULAR, n (%)</th>
@@ -13252,6 +13304,7 @@ div#notebook {
       <td>315 (89.5)</td>
       <td>491 (92.5)</td>
       <td>279 (92.1)</td>
+      <td>0.398</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13261,6 +13314,7 @@ div#notebook {
       <td>37 (10.5)</td>
       <td>40 (7.5)</td>
       <td>24 (7.9)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">HYPERTENSION, n (%)</th>
@@ -13271,6 +13325,7 @@ div#notebook {
       <td>129 (36.6)</td>
       <td>288 (54.2)</td>
       <td>143 (47.0)</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>1</th>
@@ -13280,6 +13335,7 @@ div#notebook {
       <td>223 (63.4)</td>
       <td>243 (45.8)</td>
       <td>161 (53.0)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">PARALYSIS, n (%)</th>
@@ -13290,6 +13346,7 @@ div#notebook {
       <td>349 (99.1)</td>
       <td>518 (97.6)</td>
       <td>291 (96.0)</td>
+      <td>0.068</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13299,6 +13356,7 @@ div#notebook {
       <td>3 (0.9)</td>
       <td>13 (2.4)</td>
       <td>12 (4.0)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">OTHER_NEUROLOGICAL, n (%)</th>
@@ -13309,6 +13367,7 @@ div#notebook {
       <td>304 (86.4)</td>
       <td>436 (82.1)</td>
       <td>243 (80.2)</td>
+      <td>0.121</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13318,6 +13377,7 @@ div#notebook {
       <td>48 (13.6)</td>
       <td>95 (17.9)</td>
       <td>60 (19.8)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">CHRONIC_PULMONARY, n (%)</th>
@@ -13328,6 +13388,7 @@ div#notebook {
       <td>203 (57.7)</td>
       <td>352 (66.3)</td>
       <td>207 (68.3)</td>
+      <td>0.017</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13337,6 +13398,7 @@ div#notebook {
       <td>149 (42.3)</td>
       <td>179 (33.7)</td>
       <td>96 (31.7)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">DIABETES_UNCOMPLICATED, n (%)</th>
@@ -13347,6 +13409,7 @@ div#notebook {
       <td>247 (70.2)</td>
       <td>434 (81.7)</td>
       <td>247 (81.2)</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>1</th>
@@ -13356,6 +13419,7 @@ div#notebook {
       <td>105 (29.8)</td>
       <td>97 (18.3)</td>
       <td>57 (18.8)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">DIABETES_COMPLICATED, n (%)</th>
@@ -13366,6 +13430,7 @@ div#notebook {
       <td>327 (92.9)</td>
       <td>488 (91.9)</td>
       <td>275 (90.8)</td>
+      <td>0.767</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13375,6 +13440,7 @@ div#notebook {
       <td>25 (7.1)</td>
       <td>43 (8.1)</td>
       <td>28 (9.2)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">HYPOTHYROIDISM, n (%)</th>
@@ -13385,6 +13451,7 @@ div#notebook {
       <td>287 (81.5)</td>
       <td>473 (89.1)</td>
       <td>266 (87.8)</td>
+      <td>0.011</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13394,6 +13461,7 @@ div#notebook {
       <td>65 (18.5)</td>
       <td>58 (10.9)</td>
       <td>37 (12.2)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">RENAL_FAILURE, n (%)</th>
@@ -13404,6 +13472,7 @@ div#notebook {
       <td>258 (73.3)</td>
       <td>418 (78.7)</td>
       <td>236 (77.9)</td>
+      <td>0.029</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13413,6 +13482,7 @@ div#notebook {
       <td>94 (26.7)</td>
       <td>113 (21.3)</td>
       <td>67 (22.1)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">LIVER_DISEASE, n (%)</th>
@@ -13423,6 +13493,7 @@ div#notebook {
       <td>306 (86.9)</td>
       <td>420 (79.1)</td>
       <td>236 (77.9)</td>
+      <td>0.007</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13432,6 +13503,7 @@ div#notebook {
       <td>46 (13.1)</td>
       <td>111 (20.9)</td>
       <td>67 (22.1)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">PEPTIC_ULCER, n (%)</th>
@@ -13442,6 +13514,7 @@ div#notebook {
       <td>346 (98.3)</td>
       <td>522 (98.3)</td>
       <td>298 (98.3)</td>
+      <td>0.997</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13451,6 +13524,7 @@ div#notebook {
       <td>6 (1.7)</td>
       <td>9 (1.7)</td>
       <td>5 (1.7)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">AIDS, n (%)</th>
@@ -13461,6 +13535,7 @@ div#notebook {
       <td>349 (99.1)</td>
       <td>529 (99.6)</td>
       <td>300 (99.0)</td>
+      <td>0.405</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13470,6 +13545,7 @@ div#notebook {
       <td>3 (0.9)</td>
       <td>2 (0.4)</td>
       <td>3 (1.0)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">LYMPHOMA, n (%)</th>
@@ -13480,6 +13556,7 @@ div#notebook {
       <td>342 (97.2)</td>
       <td>522 (98.3)</td>
       <td>297 (98.0)</td>
+      <td>0.595</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13489,6 +13566,7 @@ div#notebook {
       <td>10 (2.8)</td>
       <td>9 (1.7)</td>
       <td>6 (2.0)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">METASTATIC_CANCER, n (%)</th>
@@ -13499,6 +13577,7 @@ div#notebook {
       <td>326 (92.6)</td>
       <td>502 (94.5)</td>
       <td>278 (91.7)</td>
+      <td>0.338</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13508,6 +13587,7 @@ div#notebook {
       <td>26 (7.4)</td>
       <td>29 (5.5)</td>
       <td>25 (8.3)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">SOLID_TUMOR, n (%)</th>
@@ -13518,6 +13598,7 @@ div#notebook {
       <td>332 (94.3)</td>
       <td>510 (96.0)</td>
       <td>289 (95.1)</td>
+      <td>0.177</td>
     </tr>
     <tr>
       <th>1</th>
@@ -13527,6 +13608,7 @@ div#notebook {
       <td>20 (5.7)</td>
       <td>21 (4.0)</td>
       <td>15 (4.9)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">RHEUMATOID_ARTHRITIS, n (%)</th>
@@ -13537,6 +13619,7 @@ div#notebook {
       <td>338 (96.0)</td>
       <td>515 (97.0)</td>
       <td>295 (97.4)</td>
+      <td>0.610</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13546,6 +13629,7 @@ div#notebook {
       <td>14 (4.0)</td>
       <td>16 (3.0)</td>
       <td>8 (2.6)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">COAGULOPATHY, n (%)</th>
@@ -13556,6 +13640,7 @@ div#notebook {
       <td>293 (83.2)</td>
       <td>427 (80.4)</td>
       <td>235 (77.6)</td>
+      <td>0.101</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13565,6 +13650,7 @@ div#notebook {
       <td>59 (16.8)</td>
       <td>104 (19.6)</td>
       <td>68 (22.4)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">OBESITY, n (%)</th>
@@ -13575,6 +13661,7 @@ div#notebook {
       <td>323 (91.8)</td>
       <td>467 (87.9)</td>
       <td>268 (88.4)</td>
+      <td>0.027</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13584,6 +13671,7 @@ div#notebook {
       <td>29 (8.2)</td>
       <td>64 (12.1)</td>
       <td>35 (11.6)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">WEIGHT_LOSS, n (%)</th>
@@ -13594,6 +13682,7 @@ div#notebook {
       <td>330 (93.8)</td>
       <td>480 (90.4)</td>
       <td>279 (92.1)</td>
+      <td>0.303</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13603,6 +13692,7 @@ div#notebook {
       <td>22 (6.2)</td>
       <td>51 (9.6)</td>
       <td>24 (7.9)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">FLUID_ELECTROLYTE, n (%)</th>
@@ -13613,6 +13703,7 @@ div#notebook {
       <td>141 (40.1)</td>
       <td>245 (46.1)</td>
       <td>133 (43.9)</td>
+      <td>0.273</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13622,6 +13713,7 @@ div#notebook {
       <td>211 (59.9)</td>
       <td>286 (53.9)</td>
       <td>170 (56.1)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">BLOOD_LOSS_ANEMIA, n (%)</th>
@@ -13632,6 +13724,7 @@ div#notebook {
       <td>345 (98.0)</td>
       <td>517 (97.4)</td>
       <td>298 (98.3)</td>
+      <td>0.796</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13641,6 +13734,7 @@ div#notebook {
       <td>7 (2.0)</td>
       <td>14 (2.6)</td>
       <td>5 (1.7)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">DEFICIENCY_ANEMIAS, n (%)</th>
@@ -13651,6 +13745,7 @@ div#notebook {
       <td>343 (97.4)</td>
       <td>506 (95.3)</td>
       <td>285 (94.1)</td>
+      <td>0.086</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13660,6 +13755,7 @@ div#notebook {
       <td>9 (2.6)</td>
       <td>25 (4.7)</td>
       <td>18 (5.9)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">ALCOHOL_ABUSE, n (%)</th>
@@ -13670,6 +13766,7 @@ div#notebook {
       <td>331 (94.0)</td>
       <td>455 (85.7)</td>
       <td>255 (84.2)</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13679,6 +13776,7 @@ div#notebook {
       <td>21 (6.0)</td>
       <td>76 (14.3)</td>
       <td>48 (15.8)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">DRUG_ABUSE, n (%)</th>
@@ -13689,6 +13787,7 @@ div#notebook {
       <td>339 (96.3)</td>
       <td>485 (91.3)</td>
       <td>282 (93.1)</td>
+      <td>0.002</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13698,6 +13797,7 @@ div#notebook {
       <td>13 (3.7)</td>
       <td>46 (8.7)</td>
       <td>21 (6.9)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">PSYCHOSES, n (%)</th>
@@ -13708,6 +13808,7 @@ div#notebook {
       <td>344 (97.7)</td>
       <td>503 (94.7)</td>
       <td>296 (97.7)</td>
+      <td>0.007</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13717,6 +13818,7 @@ div#notebook {
       <td>8 (2.3)</td>
       <td>28 (5.3)</td>
       <td>7 (2.3)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">DEPRESSION, n (%)</th>
@@ -13727,6 +13829,7 @@ div#notebook {
       <td>303 (86.1)</td>
       <td>431 (81.2)</td>
       <td>248 (81.8)</td>
+      <td>0.056</td>
     </tr>
     <tr>
       <th>1.0</th>
@@ -13736,10 +13839,11 @@ div#notebook {
       <td>49 (13.9)</td>
       <td>100 (18.8)</td>
       <td>55 (18.2)</td>
+      <td></td>
     </tr>
   </tbody>
 </table>
-</div><br />
+</div><br />[1] Chi-squared tests for the following variables may be invalid due to the low number of observations: PARALYSIS, PEPTIC_ULCER, AIDS, LYMPHOMA, BLOOD_LOSS_ANEMIA.<br />
 </div>
 
 </div>

@@ -13029,8 +13029,6 @@ body {
 div#notebook {
   overflow: visible;
   border-top: none;
-}div#notebook-container{
-  padding: 6ex 12ex 8ex 12ex;
 }@media print {
   div.cell {
     display: block;
@@ -13077,9 +13075,67 @@ div#notebook {
     <div class="container" id="notebook-container">
 
 <div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">tableone</span> <span class="kn">import</span> <span class="n">TableOne</span>
+
+<span class="kn">from</span> <span class="nn">cleaning.caregivers.main</span> <span class="kn">import</span> <span class="n">load_data</span>
+<span class="kn">from</span> <span class="nn">notebooks.tables.ref</span> <span class="kn">import</span> <span class="n">columns</span><span class="p">,</span> <span class="n">nonnormal</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">()</span>
+
+
+<span class="n">annotation_child</span> <span class="o">=</span> <span class="n">TableOne</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">,</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span><span class="p">,</span>
+    <span class="n">groupby</span> <span class="o">=</span> <span class="s2">&quot;ANNOTATION_CHILD&quot;</span><span class="p">,</span>
+    <span class="n">nonnormal</span> <span class="o">=</span> <span class="n">nonnormal</span><span class="p">,</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="n">annotation_spouse</span> <span class="o">=</span> <span class="n">TableOne</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">,</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span><span class="p">,</span>
+    <span class="n">groupby</span> <span class="o">=</span> <span class="s2">&quot;ANNOTATION_SPOUSE&quot;</span><span class="p">,</span>
+    <span class="n">nonnormal</span> <span class="o">=</span> <span class="n">nonnormal</span><span class="p">,</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="n">annotation_both</span> <span class="o">=</span> <span class="n">TableOne</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">,</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span><span class="p">,</span>
+    <span class="n">groupby</span> <span class="o">=</span> <span class="s2">&quot;ANNOTATION_BOTH&quot;</span><span class="p">,</span>
+    <span class="n">nonnormal</span> <span class="o">=</span> <span class="n">nonnormal</span><span class="p">,</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="n">annotation_any</span> <span class="o">=</span> <span class="n">TableOne</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">,</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span><span class="p">,</span>
+    <span class="n">groupby</span> <span class="o">=</span> <span class="s2">&quot;ANNOTATION_ANY&quot;</span><span class="p">,</span>
+    <span class="n">nonnormal</span> <span class="o">=</span> <span class="n">nonnormal</span><span class="p">,</span>
+    <span class="n">pval</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span>
+
+
+<span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span>
+    <span class="n">annotation_child</span><span class="o">.</span><span class="n">tableone</span><span class="p">,</span>
+    <span class="n">annotation_spouse</span><span class="o">.</span><span class="n">tableone</span><span class="p">,</span>
+    <span class="n">annotation_both</span><span class="o">.</span><span class="n">tableone</span><span class="p">,</span>
+    <span class="n">annotation_any</span><span class="o">.</span><span class="n">tableone</span>
+<span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="Table-2">Table 2<a class="anchor-link" href="#Table-2">&#182;</a></h1><p>Study population stratified by child, spouse, and both (unadjusted)</p>
 
@@ -13087,11 +13143,25 @@ div#notebook {
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">table</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
 
 <div class="output_wrapper">
 <div class="output">
 
+
 <div class="output_area">
+
+    <div class="prompt output_prompt">Out[2]:</div>
+
 
 
 <div class="output_html rendered_html output_subarea output_execute_result">
@@ -13114,10 +13184,10 @@ div#notebook {
     <tr>
       <th></th>
       <th></th>
-      <th colspan="4" halign="left">Grouped by ANNOTATION_CHILD</th>
-      <th colspan="4" halign="left">Grouped by ANNOTATION_SPOUSE</th>
-      <th colspan="4" halign="left">Grouped by ANNOTATION_BOTH</th>
-      <th colspan="4" halign="left">Grouped by ANNOTATION_ANY</th>
+      <th colspan="5" halign="left">Grouped by ANNOTATION_CHILD</th>
+      <th colspan="5" halign="left">Grouped by ANNOTATION_SPOUSE</th>
+      <th colspan="5" halign="left">Grouped by ANNOTATION_BOTH</th>
+      <th colspan="5" halign="left">Grouped by ANNOTATION_ANY</th>
     </tr>
     <tr>
       <th></th>
@@ -13126,18 +13196,22 @@ div#notebook {
       <th>Overall</th>
       <th>False</th>
       <th>True</th>
+      <th>P-Value</th>
       <th>Missing</th>
       <th>Overall</th>
       <th>False</th>
       <th>True</th>
+      <th>P-Value</th>
       <th>Missing</th>
       <th>Overall</th>
       <th>False</th>
       <th>True</th>
+      <th>P-Value</th>
       <th>Missing</th>
       <th>Overall</th>
       <th>False</th>
       <th>True</th>
+      <th>P-Value</th>
     </tr>
   </thead>
   <tbody>
@@ -13149,17 +13223,21 @@ div#notebook {
       <td>835</td>
       <td>554</td>
       <td></td>
+      <td></td>
       <td>1389</td>
       <td>883</td>
       <td>506</td>
+      <td></td>
       <td></td>
       <td>1389</td>
       <td>1187</td>
       <td>202</td>
       <td></td>
+      <td></td>
       <td>1389</td>
       <td>531</td>
       <td>858</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">SEX, n (%)</th>
@@ -13168,18 +13246,22 @@ div#notebook {
       <td>666 (47.9)</td>
       <td>352 (42.2)</td>
       <td>314 (56.7)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>666 (47.9)</td>
       <td>480 (54.4)</td>
       <td>186 (36.8)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>666 (47.9)</td>
       <td>587 (49.5)</td>
       <td>79 (39.1)</td>
+      <td>0.008</td>
       <td>0</td>
       <td>666 (47.9)</td>
       <td>245 (46.1)</td>
       <td>421 (49.1)</td>
+      <td>0.314</td>
     </tr>
     <tr>
       <th>M</th>
@@ -13188,17 +13270,21 @@ div#notebook {
       <td>483 (57.8)</td>
       <td>240 (43.3)</td>
       <td></td>
+      <td></td>
       <td>723 (52.1)</td>
       <td>403 (45.6)</td>
       <td>320 (63.2)</td>
+      <td></td>
       <td></td>
       <td>723 (52.1)</td>
       <td>600 (50.5)</td>
       <td>123 (60.9)</td>
       <td></td>
+      <td></td>
       <td>723 (52.1)</td>
       <td>286 (53.9)</td>
       <td>437 (50.9)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">MARITAL_STATUS, n (%)</th>
@@ -13207,18 +13293,22 @@ div#notebook {
       <td>595 (44.3)</td>
       <td>353 (43.7)</td>
       <td>242 (45.3)</td>
+      <td>0.595</td>
       <td>47</td>
       <td>595 (44.3)</td>
       <td>188 (22.2)</td>
       <td>407 (82.1)</td>
+      <td>&lt;0.001</td>
       <td>47</td>
       <td>595 (44.3)</td>
       <td>425 (37.1)</td>
       <td>170 (86.3)</td>
+      <td>&lt;0.001</td>
       <td>47</td>
       <td>595 (44.3)</td>
       <td>116 (22.8)</td>
       <td>479 (57.5)</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>NOT MARRIED</th>
@@ -13227,17 +13317,21 @@ div#notebook {
       <td>455 (56.3)</td>
       <td>292 (54.7)</td>
       <td></td>
+      <td></td>
       <td>747 (55.7)</td>
       <td>658 (77.8)</td>
       <td>89 (17.9)</td>
+      <td></td>
       <td></td>
       <td>747 (55.7)</td>
       <td>720 (62.9)</td>
       <td>27 (13.7)</td>
       <td></td>
+      <td></td>
       <td>747 (55.7)</td>
       <td>393 (77.2)</td>
       <td>354 (42.5)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="3" valign="top">ETHNICITY, n (%)</th>
@@ -13246,18 +13340,22 @@ div#notebook {
       <td>1035 (74.5)</td>
       <td>630 (75.4)</td>
       <td>405 (73.1)</td>
+      <td>0.257</td>
       <td>0</td>
       <td>1035 (74.5)</td>
       <td>627 (71.0)</td>
       <td>408 (80.6)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>1035 (74.5)</td>
       <td>872 (73.5)</td>
       <td>163 (80.7)</td>
+      <td>0.066</td>
       <td>0</td>
       <td>1035 (74.5)</td>
       <td>385 (72.5)</td>
       <td>650 (75.8)</td>
+      <td>0.377</td>
     </tr>
     <tr>
       <th>OTHER</th>
@@ -13266,17 +13364,21 @@ div#notebook {
       <td>159 (19.0)</td>
       <td>124 (22.4)</td>
       <td></td>
+      <td></td>
       <td>283 (20.4)</td>
       <td>213 (24.1)</td>
       <td>70 (13.8)</td>
+      <td></td>
       <td></td>
       <td>283 (20.4)</td>
       <td>254 (21.4)</td>
       <td>29 (14.4)</td>
       <td></td>
+      <td></td>
       <td>283 (20.4)</td>
       <td>118 (22.2)</td>
       <td>165 (19.2)</td>
+      <td></td>
     </tr>
     <tr>
       <th>UNKNOWN/NOT SPECIFIED</th>
@@ -13285,17 +13387,21 @@ div#notebook {
       <td>46 (5.5)</td>
       <td>25 (4.5)</td>
       <td></td>
+      <td></td>
       <td>71 (5.1)</td>
       <td>43 (4.9)</td>
       <td>28 (5.5)</td>
+      <td></td>
       <td></td>
       <td>71 (5.1)</td>
       <td>61 (5.1)</td>
       <td>10 (5.0)</td>
       <td></td>
+      <td></td>
       <td>71 (5.1)</td>
       <td>28 (5.3)</td>
       <td>43 (5.0)</td>
+      <td></td>
     </tr>
     <tr>
       <th>ADMISSION_AGE, median [Q1,Q3]</th>
@@ -13304,18 +13410,22 @@ div#notebook {
       <td>64.9 [53.3,76.9]</td>
       <td>58.8 [47.9,69.5]</td>
       <td>74.5 [63.2,83.1]</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>64.9 [53.3,76.9]</td>
       <td>67.0 [53.4,79.5]</td>
       <td>62.9 [53.2,72.7]</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>64.9 [53.3,76.9]</td>
       <td>63.5 [52.5,76.9]</td>
       <td>69.7 [61.0,77.4]</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>64.9 [53.3,76.9]</td>
       <td>59.1 [47.5,72.4]</td>
       <td>68.4 [56.5,79.4]</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>LOS_HADM, median [Q1,Q3]</th>
@@ -13324,18 +13434,22 @@ div#notebook {
       <td>9.0 [4.9,17.2]</td>
       <td>9.6 [5.0,18.9]</td>
       <td>8.1 [4.7,15.4]</td>
+      <td>0.001</td>
       <td>0</td>
       <td>9.0 [4.9,17.2]</td>
       <td>8.5 [4.8,16.5]</td>
       <td>10.6 [5.4,18.9]</td>
+      <td>0.004</td>
       <td>0</td>
       <td>9.0 [4.9,17.2]</td>
       <td>9.0 [4.9,17.2]</td>
       <td>8.6 [4.7,16.1]</td>
+      <td>0.397</td>
       <td>0</td>
       <td>9.0 [4.9,17.2]</td>
       <td>8.8 [4.8,17.9]</td>
       <td>9.0 [4.9,16.8]</td>
+      <td>0.967</td>
     </tr>
     <tr>
       <th rowspan="7" valign="top">DISCHARGE_LOCATION, n (%)</th>
@@ -13344,18 +13458,22 @@ div#notebook {
       <td>343 (24.7)</td>
       <td>153 (18.3)</td>
       <td>190 (34.3)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>343 (24.7)</td>
       <td>199 (22.5)</td>
       <td>144 (28.5)</td>
+      <td>0.060</td>
       <td>0</td>
       <td>343 (24.7)</td>
       <td>262 (22.1)</td>
       <td>81 (40.1)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>343 (24.7)</td>
       <td>90 (16.9)</td>
       <td>253 (29.5)</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>HOME</th>
@@ -13364,17 +13482,21 @@ div#notebook {
       <td>129 (15.4)</td>
       <td>40 (7.2)</td>
       <td></td>
+      <td></td>
       <td>169 (12.2)</td>
       <td>101 (11.4)</td>
       <td>68 (13.4)</td>
+      <td></td>
       <td></td>
       <td>169 (12.2)</td>
       <td>158 (13.3)</td>
       <td>11 (5.4)</td>
       <td></td>
+      <td></td>
       <td>169 (12.2)</td>
       <td>72 (13.6)</td>
       <td>97 (11.3)</td>
+      <td></td>
     </tr>
     <tr>
       <th>HOME HEALTH CARE</th>
@@ -13383,17 +13505,21 @@ div#notebook {
       <td>142 (17.0)</td>
       <td>80 (14.4)</td>
       <td></td>
+      <td></td>
       <td>222 (16.0)</td>
       <td>151 (17.1)</td>
       <td>71 (14.0)</td>
+      <td></td>
       <td></td>
       <td>222 (16.0)</td>
       <td>197 (16.6)</td>
       <td>25 (12.4)</td>
       <td></td>
+      <td></td>
       <td>222 (16.0)</td>
       <td>96 (18.1)</td>
       <td>126 (14.7)</td>
+      <td></td>
     </tr>
     <tr>
       <th>HOSPICE</th>
@@ -13402,17 +13528,21 @@ div#notebook {
       <td>21 (2.5)</td>
       <td>9 (1.6)</td>
       <td></td>
+      <td></td>
       <td>30 (2.2)</td>
       <td>16 (1.8)</td>
       <td>14 (2.8)</td>
+      <td></td>
       <td></td>
       <td>30 (2.2)</td>
       <td>25 (2.1)</td>
       <td>5 (2.5)</td>
       <td></td>
+      <td></td>
       <td>30 (2.2)</td>
       <td>12 (2.3)</td>
       <td>18 (2.1)</td>
+      <td></td>
     </tr>
     <tr>
       <th>LONG TERM CARE HOSPITAL</th>
@@ -13421,17 +13551,21 @@ div#notebook {
       <td>150 (18.0)</td>
       <td>99 (17.9)</td>
       <td></td>
+      <td></td>
       <td>249 (17.9)</td>
       <td>161 (18.2)</td>
       <td>88 (17.4)</td>
+      <td></td>
       <td></td>
       <td>249 (17.9)</td>
       <td>209 (17.6)</td>
       <td>40 (19.8)</td>
       <td></td>
+      <td></td>
       <td>249 (17.9)</td>
       <td>102 (19.2)</td>
       <td>147 (17.1)</td>
+      <td></td>
     </tr>
     <tr>
       <th>OTHER</th>
@@ -13440,17 +13574,21 @@ div#notebook {
       <td>60 (7.2)</td>
       <td>10 (1.8)</td>
       <td></td>
+      <td></td>
       <td>70 (5.0)</td>
       <td>46 (5.2)</td>
       <td>24 (4.7)</td>
+      <td></td>
       <td></td>
       <td>70 (5.0)</td>
       <td>65 (5.5)</td>
       <td>5 (2.5)</td>
       <td></td>
+      <td></td>
       <td>70 (5.0)</td>
       <td>41 (7.7)</td>
       <td>29 (3.4)</td>
+      <td></td>
     </tr>
     <tr>
       <th>SNF</th>
@@ -13459,17 +13597,21 @@ div#notebook {
       <td>180 (21.6)</td>
       <td>126 (22.7)</td>
       <td></td>
+      <td></td>
       <td>306 (22.0)</td>
       <td>209 (23.7)</td>
       <td>97 (19.2)</td>
+      <td></td>
       <td></td>
       <td>306 (22.0)</td>
       <td>271 (22.8)</td>
       <td>35 (17.3)</td>
       <td></td>
+      <td></td>
       <td>306 (22.0)</td>
       <td>118 (22.2)</td>
       <td>188 (21.9)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">HOSPITAL_EXPIRE_FLAG, n (%)</th>
@@ -13478,18 +13620,22 @@ div#notebook {
       <td>1046 (75.3)</td>
       <td>682 (81.7)</td>
       <td>364 (65.7)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>1046 (75.3)</td>
       <td>684 (77.5)</td>
       <td>362 (71.5)</td>
+      <td>0.016</td>
       <td>0</td>
       <td>1046 (75.3)</td>
       <td>925 (77.9)</td>
       <td>121 (59.9)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>1046 (75.3)</td>
       <td>441 (83.1)</td>
       <td>605 (70.5)</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>True</th>
@@ -13498,17 +13644,21 @@ div#notebook {
       <td>153 (18.3)</td>
       <td>190 (34.3)</td>
       <td></td>
+      <td></td>
       <td>343 (24.7)</td>
       <td>199 (22.5)</td>
       <td>144 (28.5)</td>
+      <td></td>
       <td></td>
       <td>343 (24.7)</td>
       <td>262 (22.1)</td>
       <td>81 (40.1)</td>
       <td></td>
+      <td></td>
       <td>343 (24.7)</td>
       <td>90 (16.9)</td>
       <td>253 (29.5)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">MORTALITY_3MO_FROM_HADM_ADMIT, n (%)</th>
@@ -13517,18 +13667,22 @@ div#notebook {
       <td>905 (65.2)</td>
       <td>601 (72.0)</td>
       <td>304 (54.9)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>905 (65.2)</td>
       <td>589 (66.7)</td>
       <td>316 (62.5)</td>
+      <td>0.123</td>
       <td>0</td>
       <td>905 (65.2)</td>
       <td>801 (67.5)</td>
       <td>104 (51.5)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>905 (65.2)</td>
       <td>389 (73.3)</td>
       <td>516 (60.1)</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>True</th>
@@ -13537,17 +13691,21 @@ div#notebook {
       <td>234 (28.0)</td>
       <td>250 (45.1)</td>
       <td></td>
+      <td></td>
       <td>484 (34.8)</td>
       <td>294 (33.3)</td>
       <td>190 (37.5)</td>
+      <td></td>
       <td></td>
       <td>484 (34.8)</td>
       <td>386 (32.5)</td>
       <td>98 (48.5)</td>
       <td></td>
+      <td></td>
       <td>484 (34.8)</td>
       <td>142 (26.7)</td>
       <td>342 (39.9)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">MORTALITY_1Y_FROM_HADM_ADMIT, n (%)</th>
@@ -13556,18 +13714,22 @@ div#notebook {
       <td>748 (53.9)</td>
       <td>510 (61.1)</td>
       <td>238 (43.0)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>748 (53.9)</td>
       <td>486 (55.0)</td>
       <td>262 (51.8)</td>
+      <td>0.264</td>
       <td>0</td>
       <td>748 (53.9)</td>
       <td>664 (55.9)</td>
       <td>84 (41.6)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>748 (53.9)</td>
       <td>332 (62.5)</td>
       <td>416 (48.5)</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>True</th>
@@ -13576,17 +13738,21 @@ div#notebook {
       <td>325 (38.9)</td>
       <td>316 (57.0)</td>
       <td></td>
+      <td></td>
       <td>641 (46.1)</td>
       <td>397 (45.0)</td>
       <td>244 (48.2)</td>
+      <td></td>
       <td></td>
       <td>641 (46.1)</td>
       <td>523 (44.1)</td>
       <td>118 (58.4)</td>
       <td></td>
+      <td></td>
       <td>641 (46.1)</td>
       <td>199 (37.5)</td>
       <td>442 (51.5)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">MORTALITY_6MO_FROM_ICU_OUT, n (%)</th>
@@ -13595,18 +13761,22 @@ div#notebook {
       <td>823 (59.3)</td>
       <td>550 (65.9)</td>
       <td>273 (49.3)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>823 (59.3)</td>
       <td>541 (61.3)</td>
       <td>282 (55.7)</td>
+      <td>0.049</td>
       <td>0</td>
       <td>823 (59.3)</td>
       <td>729 (61.4)</td>
       <td>94 (46.5)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>823 (59.3)</td>
       <td>362 (68.2)</td>
       <td>461 (53.7)</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>True</th>
@@ -13615,17 +13785,21 @@ div#notebook {
       <td>285 (34.1)</td>
       <td>281 (50.7)</td>
       <td></td>
+      <td></td>
       <td>566 (40.7)</td>
       <td>342 (38.7)</td>
       <td>224 (44.3)</td>
+      <td></td>
       <td></td>
       <td>566 (40.7)</td>
       <td>458 (38.6)</td>
       <td>108 (53.5)</td>
       <td></td>
+      <td></td>
       <td>566 (40.7)</td>
       <td>169 (31.8)</td>
       <td>397 (46.3)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">HAS_READMISSION, n (%)</th>
@@ -13634,18 +13808,22 @@ div#notebook {
       <td>1030 (74.2)</td>
       <td>609 (72.9)</td>
       <td>421 (76.0)</td>
+      <td>0.225</td>
       <td>0</td>
       <td>1030 (74.2)</td>
       <td>630 (71.3)</td>
       <td>400 (79.1)</td>
+      <td>0.002</td>
       <td>0</td>
       <td>1030 (74.2)</td>
       <td>871 (73.4)</td>
       <td>159 (78.7)</td>
+      <td>0.130</td>
       <td>0</td>
       <td>1030 (74.2)</td>
       <td>368 (69.3)</td>
       <td>662 (77.2)</td>
+      <td>0.001</td>
     </tr>
     <tr>
       <th>True</th>
@@ -13654,17 +13832,21 @@ div#notebook {
       <td>226 (27.1)</td>
       <td>133 (24.0)</td>
       <td></td>
+      <td></td>
       <td>359 (25.8)</td>
       <td>253 (28.7)</td>
       <td>106 (20.9)</td>
+      <td></td>
       <td></td>
       <td>359 (25.8)</td>
       <td>316 (26.6)</td>
       <td>43 (21.3)</td>
       <td></td>
+      <td></td>
       <td>359 (25.8)</td>
       <td>163 (30.7)</td>
       <td>196 (22.8)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">IDENTIFIED_CONV_GOC, n (%)</th>
@@ -13673,18 +13855,22 @@ div#notebook {
       <td>443 (31.9)</td>
       <td>319 (38.2)</td>
       <td>124 (22.4)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>443 (31.9)</td>
       <td>322 (36.5)</td>
       <td>121 (23.9)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>443 (31.9)</td>
       <td>405 (34.1)</td>
       <td>38 (18.8)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>443 (31.9)</td>
       <td>236 (44.4)</td>
       <td>207 (24.1)</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>True</th>
@@ -13693,17 +13879,21 @@ div#notebook {
       <td>516 (61.8)</td>
       <td>430 (77.6)</td>
       <td></td>
+      <td></td>
       <td>946 (68.1)</td>
       <td>561 (63.5)</td>
       <td>385 (76.1)</td>
+      <td></td>
       <td></td>
       <td>946 (68.1)</td>
       <td>782 (65.9)</td>
       <td>164 (81.2)</td>
       <td></td>
+      <td></td>
       <td>946 (68.1)</td>
       <td>295 (55.6)</td>
       <td>651 (75.9)</td>
+      <td></td>
     </tr>
     <tr>
       <th rowspan="2" valign="top">IDENTIFIED_CONV_LIM, n (%)</th>
@@ -13712,18 +13902,22 @@ div#notebook {
       <td>1026 (73.9)</td>
       <td>694 (83.1)</td>
       <td>332 (59.9)</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>1026 (73.9)</td>
       <td>645 (73.0)</td>
       <td>381 (75.3)</td>
+      <td>0.393</td>
       <td>0</td>
       <td>1026 (73.9)</td>
       <td>897 (75.6)</td>
       <td>129 (63.9)</td>
+      <td>0.001</td>
       <td>0</td>
       <td>1026 (73.9)</td>
       <td>442 (83.2)</td>
       <td>584 (68.1)</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>True</th>
@@ -13732,17 +13926,21 @@ div#notebook {
       <td>141 (16.9)</td>
       <td>222 (40.1)</td>
       <td></td>
+      <td></td>
       <td>363 (26.1)</td>
       <td>238 (27.0)</td>
       <td>125 (24.7)</td>
+      <td></td>
       <td></td>
       <td>363 (26.1)</td>
       <td>290 (24.4)</td>
       <td>73 (36.1)</td>
       <td></td>
+      <td></td>
       <td>363 (26.1)</td>
       <td>89 (16.8)</td>
       <td>274 (31.9)</td>
+      <td></td>
     </tr>
     <tr>
       <th>SOFA, median [Q1,Q3]</th>
@@ -13751,18 +13949,22 @@ div#notebook {
       <td>6.0 [4.0,9.0]</td>
       <td>5.0 [3.0,8.0]</td>
       <td>6.0 [4.0,9.0]</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>6.0 [4.0,9.0]</td>
       <td>5.0 [3.0,8.0]</td>
       <td>6.0 [4.0,9.0]</td>
+      <td>0.009</td>
       <td>0</td>
       <td>6.0 [4.0,9.0]</td>
       <td>5.0 [3.0,8.0]</td>
       <td>7.0 [5.0,10.0]</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>6.0 [4.0,9.0]</td>
       <td>5.0 [3.0,8.0]</td>
       <td>6.0 [4.0,9.0]</td>
+      <td>&lt;0.001</td>
     </tr>
     <tr>
       <th>ELIX_SCORE, median [Q1,Q3]</th>
@@ -13771,18 +13973,22 @@ div#notebook {
       <td>4.0 [3.0,6.0]</td>
       <td>4.0 [3.0,6.0]</td>
       <td>5.0 [3.0,6.0]</td>
+      <td>&lt;0.001</td>
       <td>0</td>
       <td>4.0 [3.0,6.0]</td>
       <td>4.0 [3.0,6.0]</td>
       <td>4.5 [3.0,6.0]</td>
+      <td>0.353</td>
       <td>0</td>
       <td>4.0 [3.0,6.0]</td>
       <td>4.0 [3.0,6.0]</td>
       <td>5.0 [3.0,6.0]</td>
+      <td>0.020</td>
       <td>0</td>
       <td>4.0 [3.0,6.0]</td>
       <td>4.0 [3.0,6.0]</td>
       <td>5.0 [3.0,6.0]</td>
+      <td>0.003</td>
     </tr>
   </tbody>
 </table>
