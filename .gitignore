@@ -9,6 +9,7 @@ data/
 !data/raw/Dr.Cooper Analysis .xlsx
 
 models/
+!notebooks/models/
 
 venv/
 .ipynb_checkpoints/

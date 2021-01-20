@@ -46,6 +46,7 @@ def load_data():
     df = load_data_full()
     
     df_h = df.groupby("HADM_ID").agg(
+        SUBJECT_ID=("SUBJECT_ID", squish),
         SEX=("GENDER", squish),
         MARITAL_STATUS=("MARITAL_STATUS", squish),
         ETHNICITY=("ETHNICITY", squish),

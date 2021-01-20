@@ -23,12 +23,21 @@ def discharge_location(df):
         ".*HOSPICE.*": "HOSPICE",
         "ICF": "SNF",
         "REHAB/DISTINCT PART HOSP": "SNF",
-        "LEFT AGAINST MEDICAL ADVI": "OTHER",
         "SHORT TERM HOSPITAL": "OTHER",
         "DISC-TRAN TO FEDERAL HC": "OTHER",
         "DISCH-TRAN TO PSYCH HOSP": "OTHER",
         "OTHER FACILITY": "OTHER"
     }, regex=True)
+    
+    df["DISCHARGE_LOCATION"] = df["DISCHARGE_LOCATION"].replace({
+        "DEAD/EXPIRED": "DEATH",
+        "HOME HEALTH CARE": "HOME",
+        "HOSPICE": "FACILITY",
+        "LONG TERM CARE HOSPITAL": "FACILITY",
+        "SNF": "FACILITY",
+        "OTHER": "FACILITY",
+        "LEFT AGAINST MEDICAL ADVI": "UNKNOWN/NOT SPECIFIED"
+    })
     
     return df
 
@@ -40,6 +49,8 @@ def marital_status(df):
         "DIVORCED": "NOT MARRIED",
         "SEPARATED": "NOT MARRIED"
     }, regex=True)
+    
+    df["MARITAL_STATUS"] = df["MARITAL_STATUS"].fillna("UNKNOWN/NOT SPECIFIED")
     
     return df
 
