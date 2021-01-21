@@ -91,8 +91,8 @@ def format_logit_results(model):
     return results
 
 
-def run_logit(formula, df):
+def run_logit(formula, df, *args, **kwargs):
     y, X = patsy.dmatrices(formula, df, return_type="dataframe")
-    model = sm.Logit(y, X).fit()
+    model = sm.Logit(y, X).fit(*args, **kwargs)
 
     return model
