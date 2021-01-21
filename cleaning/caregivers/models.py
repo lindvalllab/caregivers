@@ -1,4 +1,7 @@
+import numpy as np
 import pandas as pd
+import patsy
+import statsmodels.api as sm
 
 from cleaning.caregivers import (
     main
@@ -25,18 +28,8 @@ COLS_TO_USE = [
 ]
 
 
-def latest_hadm(df: pd.DataFrame) -> pd.DataFrame:
-    latest = df.groupby("SUBJECT_ID")["ADMISSION_AGE"].idxmax()
-    
-    df = df.loc[latest]
-    
-    return df.reset_index(drop=True)
-
-
 def encode_binary_cols(df):
     df = df.copy()
-    
-    df["SEX"] = df["SEX"].map({"M": 0, "F": 1})
     
     bool_cols = [
         "ANNOTATION_CHILD",
@@ -58,7 +51,48 @@ def encode_binary_cols(df):
 def load_data():
     df = main.load_data()
     df = df[COLS_TO_USE].copy()
-#     df = latest_hadm(df)
     df = encode_binary_cols(df)
     
     return df
+
+
+def format_logit_results(model):
+    odds_ratios = np.exp(model.params)
+    ci = np.exp(model.conf_int())
+    pvals = model.pvalues
+    
+    decimals = 4
+    odds_ratios = np.around(odds_ratios, decimals=decimals)
+    ci = np.around(ci, decimals=decimals)
+    pvals = np.around(pvals, decimals=decimals)
+    
+    results = pd.DataFrame({
+        "odds ratio": odds_ratios,
+        "95% CI, lower": ci[0],
+        "95% CI, upper": ci[1],
+        "p-value": pvals
+    })
+    
+    pattern = r"C\((?P<name>.+)\, .+\)\[T.(?P<value>.+)\]"
+    replace = lambda match: "{name}[T.{value}]".format(
+        name=match.group("name"),
+        value=match.group("value")
+    )
+    
+    renamed_index = results\
+                    .index\
+                    .to_series()\
+                    .astype(str)\
+                    .str\
+                    .replace(pattern, replace, regex=True)
+    
+    results = results.rename(index=renamed_index)
+    
+    return results
+
+
+def run_logit(formula, df):
+    y, X = patsy.dmatrices(formula, df, return_type="dataframe")
+    model = sm.Logit(y, X).fit()
+
+    return model
