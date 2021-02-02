@@ -1,6 +1,6 @@
 attrs==19.3.0
 backcall==0.1.0
-bleach==3.1.5
+bleach==3.3.0
 -e git+https://github.com/lindvalllab/caregivers@429d411aac9b7fa8fde81d60c3c2335ed6598103#egg=Caregivers_Project
 decorator==4.4.2
 defusedxml==0.6.0
