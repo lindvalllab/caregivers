@@ -12,6 +12,7 @@ models/
 !notebooks/models/
 
 venv/
+venv-caregivers/
 .ipynb_checkpoints/
 .pytest_cache/
 
