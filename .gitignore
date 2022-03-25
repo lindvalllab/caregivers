@@ -7,5 +7,15 @@
 *.pyc
 *.egg-info
 
+data/
+!data/raw/Dr.Cooper Analysis .xlsx
+
+models/
+!notebooks/models/
+
 venv/
+venv-caregivers/
 .ipynb_checkpoints/
+.pytest_cache/
+
+.DS_Store

@@ -21,4 +21,4 @@ def test_preprocess_text(typical_note):
 
 
 def test_remove_redactions(obfuscation):
-    assert remove_redactions(obfuscation) == ''
+    assert remove_redactions(obfuscation) == ' '
