@@ -1,5 +1,14 @@
 # Caregivers Project
 
+This repository contains the code for our paper "Associations Between Family Member Involvement and Outcomes of Patients Admitted to the Intensive Care Unit".
+
+## List of Tables
+
+- [Table 1: Patient Characteristics](https://github.com/lindvalllab/caregivers/blob/master/notebooks/tables/table-2_without-neither.ipynb)
+- [Table 2: Goals of Care Conversations](https://github.com/lindvalllab/caregivers/blob/master/notebooks/models/without-neither/summary.ipynb)
+- [Table 3: Limitations in Life-Sustaining Treatments (LLST) Conversations](https://github.com/lindvalllab/caregivers/blob/master/notebooks/models/without-neither/summary.ipynb)
+- [Table 4: 3-Month Mortality](https://github.com/lindvalllab/caregivers/blob/master/notebooks/models/without-neither/summary.ipynb)
+
 ## Development Setup
 
 ### Clone the repository
